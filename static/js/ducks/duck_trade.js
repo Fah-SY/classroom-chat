@@ -56,7 +56,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const calculatedTotal = calculateTotalDucks();
 
         if (digitalDucks !== calculatedTotal) {
-            showBootstrapToast(`Math Error: You offered ${digitalDucks}, but selected ${calculatedTotal} worth of bits/bytes.`, "error");
+            showBootstrapToast(`Math Error: You offered ${digitalDucks}, but selected **${calculatedTotal.toString(2)}** worth of bits/bytes.`, "error");
             return;
         }
 
