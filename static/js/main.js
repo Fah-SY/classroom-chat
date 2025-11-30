@@ -8,7 +8,7 @@ import { handleUsernameFormSubmission, closeModalLogic, handlePasswordSubmission
 import { socket } from './sockets/socketLogic.js';
 import { setupSocketConnection, setupSocket } from './sockets/socketManager.js';
 import { setupMessagingAndConversation, sendMessage, updateConversation } from './messages/messageHandling.js';
-import { initChat } from './messages/chat.js';
+//import { initChat } from './messages/chat.js';
 import { initAchievements } from './achievements/achievements.js';
 
 
