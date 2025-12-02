@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="profile-container" style="max-width: 800px;">
+    <h2>Edit Project: {{ project.name }}</h2>
+    
+    <form method="POST">
+        <div class="form-group">
+            <label>Project Name</label>
+            <input type="text" name="name" class="form-control" value="{{ project.name }}">
+        </div>
+
+        <div class="form-group">
+            <label>Project Description</label>
+            <textarea name="description" class="form-control" rows="3">{{ project.description }}</textarea>
+        </div>
+
+        <div class="form-group">
+            <label>Live Demo / Game Link</label>
+            <input type="text" name="link" class="form-control" value="{{ project.link or '' }}">
+        </div>
+
+        <hr>
+        <h3>Case Study Details</h3>
+
+        <div class="form-group">
+            <label>Teacher's Comment</label>
+            <textarea name="teacher_comment" class="form-control" rows="3" placeholder="Paste your feedback here...">{{ project.teacher_comment or '' }}</textarea>
+        </div>
+
+        <div class="form-group">
+            <label>Video Recording URL (OneDrive/YouTube)</label>
+            <input type="text" name="video_url" class="form-control" value="{{ project.video_url or '' }}">
+        </div>
+
+        <div class="form-group">
+            <label>Student Code Snippet</label>
+            <textarea name="code_snippet" class="form-control" rows="15"
+                      style="font-family: monospace; background: #f4f4f4;"
+                      placeholder="Paste the raw Python/JS code here...">{{ project.code_snippet or '' }}</textarea>
+        </div>
+
+        <button type="submit" class="edit-btn">Save Changes</button>
+    </form>
+</div>
+{% endblock %}

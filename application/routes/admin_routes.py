@@ -7,10 +7,11 @@ Summary: Flask routes for admin routes functionality.
 import os
 import re
 from datetime import datetime, timedelta
-from flask import Blueprint, request, jsonify, render_template, send_file
+from flask import Blueprint, request, jsonify, render_template, send_file, flash, current_app
 from functools import wraps
 from sqlalchemy.sql import func
 from sqlalchemy import cast, Date
+from werkzeug.utils import secure_filename
 
 from application.extensions import db, limiter
 from application.models.challenge import Challenge
@@ -19,6 +20,7 @@ from application.models.conversation import Conversation
 from application.models.configuration import Configuration
 from application.models.duck_trade import DuckTradeLog
 from application.models.message import Message
+from application.models.project import Project
 from application.models.user import User
 from application.models.banned_words import BannedWords
 from application.config import Config
@@ -635,3 +637,43 @@ def format_file_size(size_bytes):
             return f"{size_bytes:.2f} {unit}"
         size_bytes /= 1024.0
     return f"{size_bytes:.2f} PB"
+
+
+@admin.route('/project/edit/<int:project_id>', methods=['GET', 'POST'])
+# @admin_required
+def edit_project_details(project_id):
+    project = Project.query.get_or_404(project_id)
+
+    if request.method == 'POST':
+        project.name = request.form.get('name')
+        project.description = request.form.get('description')
+        project.link = request.form.get('link')
+        project.teacher_comment = request.form.get('teacher_comment')
+        project.video_url = request.form.get('video_url')
+        project.code_snippet = request.form.get('code_snippet')
+        project.github_link = request.form.get('github_link')
+
+        # --- IMAGE UPLOAD LOGIC ---
+        if 'project_image' in request.files:
+            file = request.files['project_image']
+            if file and file.filename != '':
+                # 1. Secure the filename
+                filename = secure_filename(f"proj_{project.id}_{file.filename}")
+
+                # 2. Define path (ensure 'static/project_thumbs' exists!)
+                upload_folder = os.path.join(current_app.root_path, 'static', 'project_thumbs')
+                os.makedirs(upload_folder, exist_ok=True)  # Create folder if missing
+
+                # 3. Save file
+                file.save(os.path.join(upload_folder, filename))
+
+                # 4. Save RELATIVE path to database
+                # Note: This matches how you reference it in the template: url_for('static', filename=...)
+                # But since you are storing the full URL path in DB often, let's store the web path:
+                project.image_url = url_for('static', filename=f'project_thumbs/{filename}')
+
+        db.session.commit()
+        flash(f"Project '{project.name}' updated successfully!", "success")
+        return redirect(url_for('user.public_profile', username=project.user.username))
+
+    return render_template('admin/edit_project.html', project=project)
