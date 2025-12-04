@@ -670,4 +670,4 @@ def edit_project_details(project_id):
         flash(f"Project '{project.name}' updated successfully!", "success")
         return redirect(url_for('user.view_user_profile', user_id=project.user.id))
 
-    return render_template('admin/edit_project.html', project=project)
+    return render_template('user/edit_project.html', project=project)

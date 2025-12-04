@@ -20,10 +20,6 @@ def default_nickname(context):
     return context.get_current_parameters().get("username")
 
 class User(db.Model):
-    @property
-    def username(self):
-        return self._username
-
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
     _username = db.Column("username", db.String(50), unique=True, nullable=False)
@@ -32,6 +28,8 @@ class User(db.Model):
     ip_address = db.Column(db.String(45), nullable=True)
     is_online = db.Column(db.Boolean, default=False)
     nickname = db.Column(db.String(50), nullable=False, default=default_nickname)
+    is_admin = db.Column(db.Boolean, default=False)
+
 
     # Gamification
     packets = db.Column(db.Double, nullable=False, default=0)
