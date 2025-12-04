@@ -13,6 +13,7 @@ from sqlalchemy.sql import func
 from sqlalchemy import cast, Date
 from werkzeug.utils import secure_filename
 
+from application import config
 from application.extensions import db, limiter
 from application.models.challenge import Challenge
 from application.models.challenge_log import ChallengeLog
@@ -640,7 +641,6 @@ def format_file_size(size_bytes):
 
 
 @admin.route('/project/edit/<int:project_id>', methods=['GET', 'POST'])
-# @admin_required
 def edit_project_details(project_id):
     project = Project.query.get_or_404(project_id)
 
@@ -653,27 +653,21 @@ def edit_project_details(project_id):
         project.code_snippet = request.form.get('code_snippet')
         project.github_link = request.form.get('github_link')
 
-        # --- IMAGE UPLOAD LOGIC ---
         if 'project_image' in request.files:
             file = request.files['project_image']
+
             if file and file.filename != '':
-                # 1. Secure the filename
                 filename = secure_filename(f"proj_{project.id}_{file.filename}")
 
-                # 2. Define path (ensure 'static/project_thumbs' exists!)
-                upload_folder = os.path.join(current_app.root_path, 'static', 'project_thumbs')
-                os.makedirs(upload_folder, exist_ok=True)  # Create folder if missing
+                upload_folder = os.path.join(current_app.static_folder, 'images', 'project_thumbs')
+                os.makedirs(upload_folder, exist_ok=True)
 
-                # 3. Save file
                 file.save(os.path.join(upload_folder, filename))
 
-                # 4. Save RELATIVE path to database
-                # Note: This matches how you reference it in the template: url_for('static', filename=...)
-                # But since you are storing the full URL path in DB often, let's store the web path:
-                project.image_url = url_for('static', filename=f'project_thumbs/{filename}')
+                project.image_url = f'images/project_thumbs/{filename}'
 
         db.session.commit()
         flash(f"Project '{project.name}' updated successfully!", "success")
-        return redirect(url_for('user.public_profile', username=project.user.username))
+        return redirect(url_for('user.view_user_profile', user_id=project.user.id))
 
     return render_template('admin/edit_project.html', project=project)

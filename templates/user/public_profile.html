@@ -227,7 +227,7 @@
                         <div class="project-card">
                             <div class="project-thumb">
                                 {% if project.image_url %}
-                                    <img src="{{ project.image_url }}" alt="{{ project.name }}">
+                                    <img src="{{ url_for('static', filename=project.image_url) }}" alt="{{ project.name }}">
                                 {% else %}
                                     <div class="code-pattern-bg"><i class="fas fa-layer-group"></i></div>
                                 {% endif %}
