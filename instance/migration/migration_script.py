@@ -2,7 +2,8 @@ import sqlite3
 import csv
 import os
 
-DB_PATH = r"C:\Users\Ben\PycharmProjects\groupChat2\instance\dev_users.db"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DB_PATH = os.path.join(BASE_DIR, "..", "dev_users.db")
 CSV_PATH = "oldProjects.csv"
 
 MIGRATIONS = {
