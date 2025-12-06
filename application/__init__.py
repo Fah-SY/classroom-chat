@@ -22,7 +22,7 @@ from . import socket_events
 from application.config import DevelopmentConfig, TestingConfig, ProductionConfig
 import logging
 from flask_wtf.csrf import CSRFProtect
-
+from werkzeug.middleware.proxy_fix import ProxyFix
 from .license_checker import load_license
 
 
@@ -48,6 +48,8 @@ def create_app(config_class=None):
     app.config.from_object(config_class)
 
     CORS(app, origins=["https://codecombat.com", "https://www.ozaria.com"], supports_credentials=True)
+    # x_for=1 tells Flask to trust the first X-Forwarded-For header
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_port=1)
 
     # Configure session timeout
     app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=10)
