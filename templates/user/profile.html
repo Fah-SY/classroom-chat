@@ -1,130 +1,390 @@
-<!--
-File: profile.html
-Type: html
-Summary: User profile page template showing stats and achievements.
--->
-
 {% extends 'base.html' %}
 
 {% block content %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/profile.css') }}">
-<link rel="stylesheet" href="{{ url_for('static', filename='css/profile_picture_modal.css') }}">
-<link rel="stylesheet" href="{{ url_for('static', filename='lib/cropper.min.css') }}">
+{% set is_owner = (session.get('user') == target.id) or (viewer and viewer.is_admin) %}
 
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/public_profile.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/sprite.css') }}">
+
+{% if is_owner %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/profile_picture_modal.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='lib/cropper.min.css') }}">
+    <style>
+        .edit-project-overlay {
+            position: absolute;
+            top: 10px; right: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            width: 30px; height: 30px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; transition: opacity 0.2s ease;
+            text-decoration: none; z-index: 10;
+        }
+        .project-thumb:hover .edit-project-overlay { opacity: 1; }
+        .edit-project-overlay:hover { background: #007bff; color: white; }
+    </style>
+{% endif %}
 
 <div class="profile-container">
-    <div class="profile-header">
-        <div class="profile-pic-container">
-             {% set pfp_filename = user.profile_picture if user and user.profile_picture else 'Default_pfp.jpg' %}
-            <img src="{{ url_for('user.profile_picture', filename=pfp_filename) }}"
-                 alt="Profile Picture"
-                 class="profile-img"
-                 id="current-profile-img">
-            <button type="button" class="edit-pic-btn" id="edit-pic-trigger">✎</button>
-        </div>
 
-        <!-- Hidden file input -->
-        <input type="file" id="file-input" accept="image/*" style="display:none;">
+    <div class="profile-header-card">
+        <div class="header-background"></div>
 
-        <div class="profile-info">
-            <h1>{{ user.username }}</h1>
-            <p class="job-title">Aspiring Coder</p>
-            <p class="location">Classroom 101</p>
-            <p class="digital-ducks">Digital Ducks: {{ user.duck_balance }}</p>
-        </div>
+        <div class="header-content">
+            <div class="avatar-wrapper" style="position: relative;">
+                {% set pfp = target.profile_picture if target.profile_picture else 'Default_pfp.jpg' %}
+                <img src="{{ url_for('user.profile_picture', filename=pfp) }}"
+                     alt="{{ target.username }}"
+                     class="avatar-img"
+                     id="current-profile-img">
 
-        <!-- Edit Button -->
-        <a href="{{ url_for('user.edit_profile') }}" class="edit-btn">Edit Profile</a>
-    </div>
-
-    <!-- Modal for cropping -->
-    <div id="crop-modal" class="modal">
-        <div class="modal-content">
-            <button class="close-btn" id="close-modal">&times;</button>
-            <h3>Adjust your profile picture</h3>
-            <img id="preview" alt="Preview">
-            <div class="modal-buttons">
-                <button id="crop-btn">Crop & Save</button>
-            </div>
-        </div>
-    </div>
-
-    <div class="profile-body">
-        <!-- Progress Section -->
-        <div class="progress-section">
-            <h2>Classroom Progress</h2>
-            <div class="activity-card">
-                <h3 class="game-title">CodeCombat</h3>
-
-                {% set completed = user.get_progress("codecombat.com") %}
-                {% set percent = user.get_progress_percent("codecombat.com") %}
-
-                {% if completed %}
-                    <div class="progress-info">
-                        <span class="levels">{{ completed }} Levels Completed</span>
-                        <span class="percent">({{ percent }}%)</span>
-                    </div>
-
-                    <div class="progress-bar">
-                        <div class="progress" style="width: {{ percent }}%;"></div>
-                    </div>
-                {% else %}
-                    <p class="no-progress">No progress yet</p>
-                {% endif %}
-            </div>
-            <div class="activity-card">
-                <h3 class="game-title">Ozaria</h3>
-
-                {% set completed = user.get_progress("www.ozaria.com") %}
-                {% set percent = user.get_progress_percent("www.ozaria.com") %}
-
-                {% if completed %}
-                    <div class="progress-info">
-                        <span class="levels">{{ completed }} Levels Completed</span>
-                        <span class="percent">({{ percent }}%)</span>
-                    </div>
-
-                    <div class="progress-bar">
-                        <div class="progress" style="width: {{ percent }}%;"></div>
-                    </div>
-                {% else %}
-                    <p class="no-progress">No progress yet</p>
+                {% if is_owner %}
+                    <button type="button" class="edit-pic-btn" id="edit-pic-trigger" title="Change Profile Picture">
+                        <i class="fas fa-camera"></i>
+                    </button>
+                    <input type="file" id="file-input" accept="image/*" style="display:none;">
                 {% endif %}
             </div>
 
+            <div class="student-identity">
+                <h1 class="student-name">{{ target.nickname or target.username }}</h1>
+                <p class="student-title">{{ target.username }} | Aspiring Coder</p>
+
+                {% if is_owner %}
+                    <div style="margin-top: 10px;">
+                        <a href="{{ url_for('user.edit_profile') }}" class="btn-launch" style="padding: 5px 15px; font-size: 0.9rem;">
+                            <i class="fas fa-user-cog"></i> Account Settings
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="duck-stats">
+                <div class="stat-box">
+                    <span class="label">Lifetime Ducks</span>
+                    <span class="value">{{ target.earned_ducks }}</span>
+                </div>
+                <div class="stat-divider"></div>
+                <div class="stat-box highlight">
+                    <span class="label">Duck Balance</span>
+                    <span class="value"><i class="fas fa-coins"></i> {{ target.duck_balance }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="stats-grid">
+        <div class="grid-card">
+            <div class="icon-circle blue"><i class="fas fa-tasks"></i></div>
+            <div class="card-text">
+                <h3>{{ target.challenge_logs | length }}</h3> <p>Challenges Solved</p>
+            </div>
+        </div>
+        <div class="grid-card">
+            <div class="icon-circle green"><i class="fas fa-project-diagram"></i></div>
+            <div class="card-text">
+                <h3>{{ target.projects | length }}</h3>
+                <p>Projects Built</p>
+            </div>
+        </div>
+        <div class="grid-card">
+            <div class="icon-circle gold"><i class="fas fa-trophy"></i></div>
+            <div class="card-text">
+                <h3>{{ target.certificates | default([]) | length }}</h3>
+                <p>Certificates</p>
+            </div>
+        </div>
+        <div class="grid-card">
+            <div class="icon-circle purple"><i class="fas fa-star"></i></div>
+            <div class="card-text">
+                <h3>{{ target.skills | length }}</h3>
+                <p>Skills Unlocked</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="dashboard-panel">
+        <div class="panel-header">
+            <h2><i class="fas fa-calendar-alt"></i> Daily Coding Effort</h2>
+            <span class="sub-header-text">{{ target.challenge_logs | length }} challenges solved in the last year</span>
         </div>
 
-        <!-- Skills Section -->
-        <div class="skills-section">
-            <h2>Top Skills</h2>
-            <div class="skills">
-                {% for skill in user.skills %}
-                <span class="skill-tag">
-                    {{ skill.name }}
-                    <a href="#" class="remove-skill" data-skill-id="{{ skill.id }}">×</a>
-                </span>
-                {% endfor %}
+        <div class="graph-scroll-container">
+            {% set graph_data = target.get_contribution_data() %}
+            <table class="contribution-table">
+                <thead>
+                    <tr>
+                        <td style="width: 30px"></td>
+                        {% for month in graph_data.months %}
+                            <td class="month-label" colspan="{{ month.colspan }}">{{ month.name }}</td>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% set day_labels = ["", "Mon", "", "Wed", "", "Fri", ""] %}
+                    {% for row_index in range(7) %}
+                    <tr class="graph-row">
+                        <td class="day-label">
+                            <span class="sr-only">{{ day_labels[row_index] }}</span>
+                            <span aria-hidden="true">{{ day_labels[row_index] }}</span>
+                        </td>
+                        {% for week_data in graph_data.rows[row_index] %}
+                            {% if week_data %}
+                                <td class="day-cell"
+                                    data-level="{{ week_data.level }}"
+                                    title="{{ week_data.count }} contributions on {{ week_data.date }}">
+                                </td>
+                            {% else %}
+                                <td class="day-cell" data-level="0"></td>
+                            {% endif %}
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="graph-footer">
+            <div class="legend">
+                <span>Less</span>
+                <div class="day-cell" data-level="0"></div>
+                <div class="day-cell" data-level="1"></div>
+                <div class="day-cell" data-level="2"></div>
+                <div class="day-cell" data-level="3"></div>
+                <div class="day-cell" data-level="4"></div>
+                <span>More</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="dashboard-grid">
+
+        <div class="column-left">
+            <div class="dashboard-panel">
+                <div class="panel-header">
+                    <h2><i class="fas fa-chart-line"></i> Curriculum Progress</h2>
+                </div>
+
+                {% set cc_levels = target.get_progress("codecombat.com") %}
+                {% set cc_percent = target.get_progress_percent("codecombat.com") %}
+                <div class="progress-item">
+                    <div class="prog-label">
+                        <span>CodeCombat</span>
+                        <span>{{ cc_percent }}%</span>
+                    </div>
+                    <div class="progress-track">
+                        <div class="progress-fill" style="width: {{ cc_percent }}%;"></div>
+                    </div>
+                    <small>{{ cc_levels }} Levels Completed</small>
+                </div>
+
+                {% set oz_levels = target.get_progress("www.ozaria.com") %}
+                {% set oz_percent = target.get_progress_percent("www.ozaria.com") %}
+                <div class="progress-item">
+                    <div class="prog-label">
+                        <span>Ozaria</span>
+                        <span>{{ oz_percent }}%</span>
+                    </div>
+                    <div class="progress-track">
+                        <div class="progress-fill ozaria-fill" style="width: {{ oz_percent }}%;"></div>
+                    </div>
+                    <small>{{ oz_levels }} Levels Completed</small>
+                </div>
+            </div>
+
+            <div class="dashboard-panel">
+                <div class="panel-header">
+                    <h2><i class="fas fa-tools"></i> Technical Skills</h2>
+                </div>
+                <div class="skill-cloud">
+                    {% for skill in target.skills %}
+                        <span class="skill-tag">{{ skill.name }}</span>
+                    {% else %}
+                        <p style="color:#777; font-size:0.9rem;">No skills recorded yet.</p>
+                    {% endfor %}
+                </div>
             </div>
         </div>
 
-        <!-- Projects Section -->
-        <div class="projects-section">
-            <h2>Recent Projects</h2>
-            {% for project in user.projects %}
-            <div class="project-entry">
-                <h3>{{ project.name }}</h3>
-                <p>{{ project.description }}</p>
-                <p><a href="{{ project.link }}" target="_blank">View Project</a></p>
+        <div class="column-right">
+
+            {% if target.certificates %}
+            <div class="dashboard-panel">
+                <div class="panel-header">
+                    <h2><i class="fas fa-certificate"></i> Verified Certificates</h2>
+                </div>
+                <div class="cert-list">
+                    {% for cert in target.certificates %}
+                    <div class="cert-item">
+                        <div class="cert-icon">
+                            {% set achievement_slug = cert.achievement.slug if cert.achievement else 'default' %}
+                            <div class="badge-container">
+                                <div class="badge badge-{{ achievement_slug }}">&nbsp;</div>
+                            </div>
+                        </div>
+                        <div class="cert-info">
+                            <h4>{{ cert.achievement.name if cert.achievement else "Course Completion" }}</h4>
+                            <span class="cert-date">Awarded: {{ cert.submitted_at.strftime('%b %Y') if cert.submitted_at else 'Recently' }}</span>
+                        </div>
+                        {% if cert.file_path %}
+                            <a href="{{ url_for('achievements.view_certificate', cert_id=cert.id) }}" target="_blank" class="cert-link">View File</a>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
             </div>
-            {% endfor %}
+            {% endif %}
+
+            <div class="dashboard-panel">
+                <div class="panel-header" style="justify-content: space-between; align-items: center;">
+                    <h2><i class="fas fa-gamepad"></i> Project Portfolio</h2>
+                    {% if is_owner %}
+                        <a href="{{ url_for('user.new_project') }}" class="btn-launch" style="font-size: 0.8rem;">
+                            <i class="fas fa-plus"></i> New Project
+                        </a>
+                    {% endif %}
+                </div>
+
+                <div class="project-grid">
+                    {% for project in target.projects %}
+                        <div class="project-card">
+                            <div class="project-thumb" style="position: relative;">
+                                {% if project.image_url %}
+                                    <img src="{{ url_for('static', filename=project.image_url) }}" alt="{{ project.name }}">
+                                {% else %}
+                                    <div class="code-pattern-bg"><i class="fas fa-layer-group"></i></div>
+                                {% endif %}
+
+                                {% if is_owner %}
+                                    <a href="{{ url_for('user.edit_project', project_id=project.id) }}" class="edit-project-overlay" title="Edit Project">
+                                        <i class="fas fa-pencil-alt"></i>
+                                    </a>
+                                {% endif %}
+                            </div>
+
+                            <div class="project-content">
+                                <h3>{{ project.name }}</h3>
+                                <p class="project-excerpt">{{ project.description | truncate(80) }}</p>
+
+                                <div class="project-actions">
+                                    {% if project.link %}
+                                        <a href="{{ project.link }}" target="_blank" class="btn-launch">
+                                            <i class="fas fa-external-link-alt"></i> Demo
+                                        </a>
+                                    {% endif %}
+                                    <button class="btn-details" onclick="openProjectModal('modal-{{ project.id }}')">
+                                        <i class="fas fa-file-code"></i> Case Study
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="modal-{{ project.id }}" class="project-modal-overlay" style="display:none;">
+                            <div class="project-modal-content">
+                                <button class="modal-close" onclick="closeProjectModal('modal-{{ project.id }}')">&times;</button>
+                                <div class="modal-header">
+                                    <h2>{{ project.name }}</h2>
+                                    {% if project.link %}
+                                        <a href="{{ project.link }}" target="_blank" class="btn-launch-large">
+                                            <i class="fas fa-rocket"></i> Launch Project
+                                        </a>
+                                    {% endif %}
+                                </div>
+                                <div class="modal-body-grid">
+                                    <div class="modal-left">
+                                        <div class="info-block">
+                                            <h4>About this Project</h4>
+                                            <p>{{ project.description }}</p>
+                                        </div>
+
+                                        {% if project.teacher_comment %}
+                                        <div class="info-block teacher-feedback">
+                                            <h4>Instructor Feedback</h4>
+                                            <blockquote>"{{ project.teacher_comment }}"</blockquote>
+                                        </div>
+                                        {% endif %}
+
+                                        {% if project.video_url %}
+                                        <div class="info-block">
+                                            <h4>Project Walkthrough</h4>
+                                            <a href="{{ project.video_url }}" target="_blank" class="video-link-box">
+                                                <i class="fas fa-play-circle fa-2x"></i>
+                                                <span>Watch Video Recording</span>
+                                            </a>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="modal-right">
+                                        <h4>Source Code & Logic</h4>
+                                        {% if project.code_snippet %}
+                                            <div class="code-scroll-container">
+                                                <pre><code>{{ project.code_snippet }}</code></pre>
+                                            </div>
+                                        {% elif project.github_link %}
+                                            <div class="github-box">
+                                                <i class="fab fa-github fa-3x"></i>
+                                                <p>Code hosted on GitHub</p>
+                                                <a href="{{ project.github_link }}" target="_blank" class="btn-github">View Repo</a>
+                                            </div>
+                                        {% else %}
+                                            <p class="no-code">No code preview available.</p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
         </div>
     </div>
 </div>
 
-<!-- Scripts -->
+{% if is_owner %}
+<div id="crop-modal" class="modal">
+    <div class="modal-content">
+        <button class="close-btn" id="close-modal">&times;</button>
+        <h3>Adjust your profile picture</h3>
+        <div style="max-height: 400px; overflow: hidden;">
+            <img id="preview" alt="Preview" style="max-width: 100%;">
+        </div>
+        <div class="modal-buttons">
+            <button id="crop-btn" class="btn-launch">Crop & Save</button>
+        </div>
+    </div>
+</div>
+{% endif %}
 
-<script src="{{ url_for('static', filename='lib/cropper.min.js') }}"></script>
-<script src="{{ url_for('static', filename='js/users/profile.js') }}"></script>
+<script>
+    // Project Modal Logic (Needed for everyone)
+    function openProjectModal(id) {
+        var modal = document.getElementById(id);
+        if (modal) {
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+    }
 
+    function closeProjectModal(id) {
+        var modal = document.getElementById(id);
+        if (modal) {
+            modal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+    }
+
+    window.onclick = function(event) {
+        if (event.target.classList.contains('project-modal-overlay')) {
+            event.target.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+    }
+</script>
+
+{% if is_owner %}
+    <script src="{{ url_for('static', filename='lib/cropper.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/users/profile.js') }}"></script>
+{% endif %}
 
 {% endblock %}
