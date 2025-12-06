@@ -7,7 +7,7 @@ Summary: Flask routes for admin routes functionality.
 import os
 import re
 from datetime import datetime, timedelta
-from flask import Blueprint, request, jsonify, render_template, send_file
+from flask import Blueprint, request, jsonify, render_template, send_file, session
 from functools import wraps
 from sqlalchemy.sql import func
 from sqlalchemy import cast, Date
