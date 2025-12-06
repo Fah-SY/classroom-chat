@@ -222,10 +222,6 @@ def update_challenge_values(conn):
 
 
 
-    conn.close()
-    print("Migration complete.")
-
-
 if __name__ == "__main__":
     try:
         conn = sqlite3.connect(DB_PATH)
@@ -235,3 +231,4 @@ if __name__ == "__main__":
     finally:
         if conn:
             conn.close()
+            print("Migration complete.")
