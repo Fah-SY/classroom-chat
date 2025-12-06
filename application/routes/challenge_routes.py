@@ -86,7 +86,7 @@ def submit_challenge():
 
 URL_PATTERN = (
     r"https://(?P<domain>[\w\.-]+)"
-    r"(?:/play/level/(?P<challenge_name>[\w-]+)"
+    r"(?:/play/(?:ozaria/)?level/(?P<challenge_name>[\w-]+)"
     r"(?:\?(?:.*&)?course=(?P<course_id>[\w-]+))?"
     r"(?:(?:\?|&)(?:.*&)?course-instance=(?P<course_instance>[\w-]+))?"
     r"|/s/(?P<slug>[\w-]+)/lessons/(?P<lesson_id>\d+)/levels/(?P<level_id>\d+))"
