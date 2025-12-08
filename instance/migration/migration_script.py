@@ -8,6 +8,11 @@ except ImportError:
     print("Warning: seed_ben.py not found. Skipping seed.")
     seed_ben_data = None
 
+try:
+    from seed_courses import seed_course_instances # <--- Add Import
+except ImportError:
+    seed_course_instances = None
+
 # ================= CONFIGURATION =================
 
 DB_FILENAME = "dev_users.db"
@@ -61,6 +66,9 @@ if __name__ == "__main__":
             with sqlite3.connect(DB_PATH) as conn:
                 # 1. Apply Schema Changes
                 apply_schema_changes(conn)
+
+                if seed_course_instances:
+                    seed_course_instances(conn)  # <--- Add Call
 
                 # 2. Run the separated seed script
                 if seed_ben_data:
