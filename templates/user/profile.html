@@ -193,15 +193,45 @@
                 </div>
             </div>
 
+            <!-- NEW TECHNICAL STACK SECTION -->
             <div class="dashboard-panel">
                 <div class="panel-header">
-                    <h2><i class="fas fa-tools"></i> Technical Skills</h2>
+                    <h2><i class="fas fa-tools"></i> Technical Stack</h2>
                 </div>
-                <div class="skill-cloud">
-                    {% for skill in target.skills %}
-                        <span class="skill-tag">{{ skill.name }}</span>
+
+                <!-- 1. Languages & Tools (Big Icons) -->
+                <h4 class="skill-category-title">Languages & Tools</h4>
+                <div class="skill-grid-visual">
+                    {% for skill in target.skills if skill.category in ['language', 'tool'] %}
+                    <div class="skill-card-visual level-{{ skill.proficiency }}">
+                        <i class="{{ skill.icon }} fa-2x"></i>
+                        <span>{{ skill.name }}</span>
+                        <!-- Proficiency Stars -->
+                        <div class="star-rating">
+                            {% for i in range(skill.proficiency) %}
+                                <i class="fas fa-star"></i>
+                            {% endfor %}
+                        </div>
+                    </div>
                     {% else %}
-                        <p style="color:#777; font-size:0.9rem;">No skills recorded yet.</p>
+                        <p style="color:#888; font-size: 0.9rem; grid-column: 1/-1;">No languages recorded.</p>
+                    {% endfor %}
+                </div>
+
+                <hr style="border-top: 1px dashed #eee; margin: 15px 0;">
+
+                <!-- 2. Concepts (Clean List) -->
+                <h4 class="skill-category-title">Core Concepts</h4>
+                <div class="skill-list-concepts">
+                    {% for skill in target.skills if skill.category == 'concept' %}
+                    <div class="concept-tag">
+                        <i class="fas fa-check-circle"></i> {{ skill.name }}
+                    </div>
+                    {% else %}
+                        {# Fallback for legacy skills #}
+                        {% for skill in target.skills if not skill.category %}
+                            <span class="skill-tag">{{ skill.name }}</span>
+                        {% endfor %}
                     {% endfor %}
                 </div>
             </div>

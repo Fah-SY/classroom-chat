@@ -1,4 +1,3 @@
-# TODO add helper to the remote db
 from application.extensions import db
 
 

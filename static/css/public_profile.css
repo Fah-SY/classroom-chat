@@ -719,3 +719,110 @@ Dependencies: uses variables from variables.css
         grid-template-columns: 1fr;
     }
 }
+
+/* --- NEW SKILLS SECTION STYLES --- */
+
+/* Typography */
+.skill-category-title {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #888;
+    margin: 10px 0 15px 0;
+    font-weight: 700;
+}
+
+/* 1. Visual Grid for Languages */
+.skill-grid-visual {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.skill-card-visual {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 15px 10px;
+    border-radius: 8px;
+    transition: transform 0.2s, box-shadow 0.2s;
+    background: #fff;
+    border: 2px solid #e2e8f0; /* Default Border */
+}
+
+.skill-card-visual:hover {
+    transform: translateY(-3px);
+}
+
+.skill-card-visual i {
+    margin-bottom: 8px;
+    color: var(--primary-color);
+}
+
+.skill-card-visual span {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #4a5568;
+    text-align: center;
+}
+
+/* 2. Concept List */
+.skill-list-concepts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.concept-tag {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    color: #4a5568;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.concept-tag i {
+    color: var(--secondary-color); /* Green/Teal checkmark */
+    font-size: 0.8rem;
+}
+
+/* --- GAMIFICATION LEVELS --- */
+
+/* Level 1: Bronze */
+.skill-card-visual.level-1 {
+    border-color: #cd7f32;
+    background: linear-gradient(to bottom right, #fff, #fffbf7);
+}
+.skill-card-visual.level-1 > i { color: #cd7f32; }
+
+/* Level 2: Silver */
+.skill-card-visual.level-2 {
+    border-color: #b0c4de;
+    background: linear-gradient(to bottom right, #fff, #f0f4f8);
+    box-shadow: 0 4px 6px rgba(176, 196, 222, 0.3);
+}
+.skill-card-visual.level-2 > i { color: #778899; }
+
+/* Level 3: Gold (The "Master" Look) */
+.skill-card-visual.level-3 {
+    border-color: #ffd700;
+    background: linear-gradient(to bottom right, #fff, #fffdf0);
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
+    transform: scale(1.05);
+}
+.skill-card-visual.level-3 > i { color: #d4af37; }
+
+/* Proficiency Stars */
+.star-rating {
+    margin-top: 5px;
+    font-size: 0.6rem;
+    display: flex;
+    gap: 2px;
+    color: #ffc107;
+}
