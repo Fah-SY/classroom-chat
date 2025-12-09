@@ -74,7 +74,8 @@ def submit_challenge():
             "submit_challenge.html",
             success=True,
             message=f"Congrats {user.username}, you earned {duck_reward} ducks!",
-)
+            quack_count=duck_reward  # <--- Add this line
+        )
 
     # Failure path
     msg = details.get("message", "Mr. Mega does not recognize this challenge. Are you sure this is the right link?")

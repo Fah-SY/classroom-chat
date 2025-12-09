@@ -42,20 +42,50 @@ Summary: Challenge submission template for CodeCombat/Ozaria links.
 
 {% if message %}
 <script>
-    {% if success %}
-    Swal.fire({
-        title: 'Congratulations!',
-        text: '{{ message|escape }}',
-        icon: 'success',
-        confirmButtonText: 'Awesome!'
-    });
-    {% else %}
-    Swal.fire({
-        title: 'Info',
-        text: '{{ message|escape }}',
-        icon: 'info',
-        confirmButtonText: 'Continue'
-    });
+    // --- Quack Logic ---
+    function playQuackSound() {
+        return new Promise((resolve, reject) => {
+            // Use Flask url_for to ensure the path is correct
+            const quack = new Audio("{{ url_for('static', filename='sounds/quack.mp3') }}");
+            quack.onended = resolve;
+            quack.onerror = reject;
+            // Handle autoplay policies by catching errors
+            quack.play().catch((err) => {
+                console.warn("Autoplay prevented:", err);
+                resolve(); // Resolve anyway to continue the loop
+            });
+        });
+    }
+
+    async function playQuacksSequentially(count) {
+        for (let i = 0; i < count; i++) {
+            await playQuackSound();
+        }
+    }
+
+    // --- Alert & Trigger Logic ---
+    {% if message %}
+        {% if success %}
+            Swal.fire({
+                title: 'Congratulations!',
+                text: '{{ message|escape }}',
+                icon: 'success',
+                confirmButtonText: 'Awesome!',
+                // Trigger quacks immediately when the alert opens
+                didOpen: () => {
+                    {% if quack_count and quack_count > 0 %}
+                        playQuacksSequentially({{ quack_count }});
+                    {% endif %}
+                }
+            });
+        {% else %}
+            Swal.fire({
+                title: 'Info',
+                text: '{{ message|escape }}',
+                icon: 'info',
+                confirmButtonText: 'Continue'
+            });
+        {% endif %}
     {% endif %}
 </script>
 {% endif %}

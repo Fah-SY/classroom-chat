@@ -176,30 +176,12 @@ function handleResponse(data) {
         clearMessageInput();
         if (data.system_message) {
             showAlert(data.system_message, 'success');
-            if (data.quack_count) {
-                playQuacksSequentially(data.quack_count);
-            }
         }
     } else {
         showAlert((data.system_message || data.error || "Something went wrong."), 'error');
     }
 }
 
-
-async function playQuacksSequentially(count) {
-    for (let i = 0; i < count; i++) {
-        await playQuackSound();
-    }
-}
-
-function playQuackSound() {
-    return new Promise((resolve, reject) => {
-        const quack = new Audio("/static/sounds/quack.mp3");
-        quack.onended = resolve;
-        quack.onerror = reject;
-        quack.play().catch(reject);
-    });
-}
 
 function handleError(error) {
     console.error('Error:', error);
