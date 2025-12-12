@@ -22,7 +22,7 @@ upload = Blueprint('upload', __name__)
 
 @upload.route('/upload_file', methods=['POST'])
 @limiter.limit("10 per minute; 20 per day")
-@premium_required
+# @premium_required
 def upload_file():
     if not request.is_json:
         return jsonify({"error": "Invalid JSON data"}), 400
@@ -69,7 +69,7 @@ def upload_file():
 
 
 @upload.route('/uploads/<filename>')
-@premium_required
+# @premium_required
 def uploaded_file(filename):
     file_path = os.path.join(Config.UPLOAD_FOLDER, filename)
     if os.path.exists(file_path):

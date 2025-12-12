@@ -85,7 +85,7 @@ def get_duck_transactions_data():
         day_earned = db.session.query(
             func.coalesce(func.sum(Challenge.value), 0)
 ).select_from(ChallengeLog).join(
-            Challenge, Challenge.slug.ilike(ChallengeLog.challenge_name)
+            Challenge, Challenge.slug.ilike(ChallengeLog.challenge_slug)
 ).filter(
             ChallengeLog.timestamp.between(day_start, day_end)
 ).scalar() or 0
@@ -122,7 +122,7 @@ def dashboard():
     ducks_earned_today = db.session.query(
         func.coalesce(func.sum(Challenge.value), 0)
     ).select_from(ChallengeLog).join(
-        Challenge, Challenge.slug.ilike(ChallengeLog.challenge_name)
+        Challenge, Challenge.slug.ilike(ChallengeLog.challenge_slug)
     ).filter(
         cast(ChallengeLog.timestamp, Date) == today
     ).scalar()
