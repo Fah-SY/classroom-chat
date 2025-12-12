@@ -1,8 +1,7 @@
 /*
-File: public_profile.css
+File: user_profile.css
 Type: css
-Summary: Styles for the public-facing student dashboard/portfolio.
-Dependencies: uses variables from variables.css
+Summary: Styles for the student dashboard/portfolio.
 */
 
 /* --- 1. Main Layout & Animation --- */
@@ -10,7 +9,7 @@ Dependencies: uses variables from variables.css
 .profile-container {
     max-width: var(--max-container-width);
     margin: 0 auto;
-    padding: 20px;
+    padding: 15px;
     box-sizing: border-box;
     font-family: var(--font-family);
     animation: fadeUp 0.5s ease-out;
@@ -28,12 +27,12 @@ Dependencies: uses variables from variables.css
     border-radius: var(--border-radius-medium);
     box-shadow: var(--box-shadow-medium);
     overflow: visible;
-    margin-bottom: 25px;
+    margin-bottom: 20px;
     position: relative;
 }
 
 .header-background {
-    height: 140px;
+    height: 100px;
     background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
     border-radius: var(--border-radius-medium) var(--border-radius-medium) 0 0;
 }
@@ -41,10 +40,10 @@ Dependencies: uses variables from variables.css
 .header-content {
     display: flex;
     align-items: flex-end;
-    padding: 0 30px 20px;
-    margin-top: -70px;
+    padding: 0 30px 15px;
+    margin-top: -50px;
     flex-wrap: wrap;
-    gap: 25px;
+    gap: 20px;
     position: relative;
 }
 
@@ -54,10 +53,10 @@ Dependencies: uses variables from variables.css
 }
 
 .avatar-img {
-    width: 150px;
-    height: 150px;
+    width: 130px;
+    height: 130px;
     border-radius: 50%;
-    border: 5px solid #fff;
+    border: 4px solid #fff;
     box-shadow: var(--box-shadow-medium);
     object-fit: cover;
     background-color: #fff;
@@ -65,22 +64,22 @@ Dependencies: uses variables from variables.css
 
 .student-identity {
     flex: 1;
-    margin-bottom: 10px;
+    margin-bottom: 5px;
     min-width: 200px;
 }
 
 .student-name {
     margin: 0;
-    font-size: 2.2rem;
+    font-size: 2rem;
     color: var(--text-color);
     font-weight: 700;
 }
 
 .student-title {
-    margin: 5px 0 10px 0;
+    margin: 2px 0 8px 0;
     color: var(--primary-color);
     font-weight: 500;
-    font-size: 1.1rem;
+    font-size: 1rem;
 }
 
 /* --- 3. Gamification Stats (Ducks) --- */
@@ -90,9 +89,9 @@ Dependencies: uses variables from variables.css
     align-items: center;
     background: var(--background-light);
     border-radius: var(--border-radius-medium);
-    padding: 10px 20px;
+    padding: 8px 15px;
     border: 1px solid var(--border-color);
-    margin-bottom: 10px;
+    margin-bottom: 5px;
     box-shadow: var(--box-shadow-light);
 }
 
@@ -100,25 +99,25 @@ Dependencies: uses variables from variables.css
     display: flex;
     flex-direction: column;
     align-items: center;
-    min-width: 80px;
+    min-width: 70px;
 }
 
 .stat-divider {
     width: 1px;
-    height: 30px;
+    height: 25px;
     background: var(--border-color);
-    margin: 0 15px;
+    margin: 0 12px;
 }
 
 .stat-box .label {
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     text-transform: uppercase;
     color: #666;
     letter-spacing: 0.5px;
 }
 
 .stat-box .value {
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     font-weight: 800;
     color: var(--text-color);
 }
@@ -127,102 +126,46 @@ Dependencies: uses variables from variables.css
     color: var(--highlight-hover);
 }
 
-/* --- 4. Top Stats Grid --- */
-
-.stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 20px;
-    margin-bottom: 25px;
-}
-
-.grid-card {
-    background: #fff;
-    padding: 20px;
-    border-radius: var(--border-radius-medium);
-    box-shadow: var(--box-shadow-light);
-    display: flex;
-    align-items: center;
-    border-left: 5px solid var(--primary-color);
-    transition: transform var(--transition-default);
-}
-
-.grid-card:hover {
-    transform: translateY(-5px);
-    box-shadow: var(--box-shadow-medium);
-}
-
-.icon-circle {
-    width: 54px;
-    height: 54px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.4rem;
-    margin-right: 15px;
-    background: var(--background-light);
-    flex-shrink: 0;
-}
-
-.icon-circle.blue { color: var(--secondary-color); background: #e3f2fd; }
-.icon-circle.green { color: var(--strength-strong); background: #e8f5e9; }
-.icon-circle.gold { color: var(--highlight-hover); background: #fffde7; }
-.icon-circle.purple { color: #9c27b0; background: #f3e5f5; }
-
-.card-text h3 {
-    margin: 0;
-    font-size: 1.8rem;
-    color: var(--primary-color-dark);
-}
-
-.card-text p {
-    margin: 0;
-    color: #888;
-    font-size: 0.85rem;
-    text-transform: uppercase;
-    font-weight: 600;
-}
-
 /* --- 5. Dashboard Grid Structure --- */
 
 .dashboard-grid {
     display: grid;
     grid-template-columns: 1fr 2fr;
-    gap: 25px;
+    gap: 20px;
     align-items: start;
 }
 
 .dashboard-panel {
     background: #fff;
     border-radius: var(--border-radius-medium);
-    padding: 25px;
-    margin-bottom: 25px;
+    padding: 20px;
+    margin-bottom: 20px;
     box-shadow: var(--box-shadow-light);
     height: fit-content;
+    scroll-margin-top: 20px;
 }
 
 .panel-header {
     border-bottom: 1px solid var(--border-color);
-    margin-bottom: 20px;
-    padding-bottom: 10px;
+    margin-bottom: 15px;
+    padding-bottom: 8px;
 }
 
 .panel-header h2 {
     margin: 0;
-    font-size: 1.3rem;
+    font-size: 1.2rem;
     color: var(--primary-color-dark);
     text-align: left;
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
 }
 
 /* --- 6. Heatmap / Contribution Graph --- */
 
 .graph-scroll-container {
     overflow-x: auto;
-    padding-bottom: 10px;
+    padding-bottom: 5px;
 }
 
 .contribution-table {
@@ -232,7 +175,7 @@ Dependencies: uses variables from variables.css
 }
 
 .month-label {
-    font-size: 12px;
+    font-size: 11px;
     color: #555;
     text-align: left;
     padding-bottom: 5px;
@@ -251,14 +194,8 @@ Dependencies: uses variables from variables.css
     width: 10px;
     height: 10px;
     border-radius: 2px;
-    background-color: #ebedf0; /* Level 0 */
+    background-color: #ebedf0;
     box-sizing: border-box;
-}
-
-.day-cell:hover {
-    outline: 1px solid rgba(0,0,0,0.4);
-    outline-offset: -1px;
-    cursor: pointer;
 }
 
 .day-cell[data-level="0"] { background-color: #ebedf0; }
@@ -269,11 +206,12 @@ Dependencies: uses variables from variables.css
 
 .graph-footer {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-end;
     align-items: center;
-    margin-top: 10px;
-    font-size: 12px;
+    margin-top: 8px;
+    font-size: 11px;
     color: #586069;
+    gap: 5px;
 }
 
 .graph-footer .legend {
@@ -284,23 +222,23 @@ Dependencies: uses variables from variables.css
 
 /* --- 7. Progress & Skills --- */
 
-.progress-item { margin-bottom: 25px; }
+.progress-item { margin-bottom: 20px; }
 
 .prog-label {
     display: flex;
     justify-content: space-between;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
     font-weight: 600;
     color: var(--text-color);
-    font-size: 0.95rem;
+    font-size: 0.9rem;
 }
 
 .progress-track {
-    height: 12px;
+    height: 10px;
     background: var(--background-light);
     border-radius: 10px;
     overflow: hidden;
-    margin-bottom: 5px;
+    margin-bottom: 4px;
     border: 1px solid #eee;
 }
 
@@ -317,24 +255,23 @@ Dependencies: uses variables from variables.css
 
 .progress-item small {
     color: #888;
-    font-size: 0.85rem;
+    font-size: 0.8rem;
 }
 
-/* Technical Stack Typography & Grid */
 .skill-category-title {
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     color: #888;
-    margin: 10px 0 15px 0;
+    margin: 10px 0 10px 0;
     font-weight: 700;
 }
 
 .skill-grid-visual {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-    gap: 15px;
-    margin-bottom: 20px;
+    grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+    gap: 12px;
+    margin-bottom: 15px;
 }
 
 .skill-card-visual {
@@ -342,7 +279,7 @@ Dependencies: uses variables from variables.css
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 15px 10px;
+    padding: 12px 8px;
     border-radius: 8px;
     transition: transform 0.2s, box-shadow 0.2s;
     background: #fff;
@@ -350,16 +287,17 @@ Dependencies: uses variables from variables.css
 }
 
 .skill-card-visual:hover {
-    transform: translateY(-3px);
+    transform: translateY(-2px);
 }
 
 .skill-card-visual i {
-    margin-bottom: 8px;
+    margin-bottom: 6px;
     color: var(--primary-color);
+    font-size: 1.5rem;
 }
 
 .skill-card-visual span {
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     font-weight: 600;
     color: #4a5568;
     text-align: center;
@@ -368,26 +306,26 @@ Dependencies: uses variables from variables.css
 .skill-list-concepts {
     display: flex;
     flex-wrap: wrap;
-    gap: 10px;
+    gap: 8px;
 }
 
 .concept-tag {
     background: #fff;
     border: 1px solid #e2e8f0;
     color: #4a5568;
-    padding: 6px 12px;
+    padding: 5px 10px;
     border-radius: 20px;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     display: flex;
     align-items: center;
     gap: 6px;
 }
 
-.concept-tag i { color: var(--secondary-color); font-size: 0.8rem; }
-.skill-tag { /* Legacy fallback */
+.concept-tag i { color: var(--secondary-color); font-size: 0.75rem; }
+.skill-tag {
     background: var(--background-light); color: var(--primary-color-dark);
-    padding: 8px 14px; border-radius: 20px;
-    font-size: 0.9rem; font-weight: 500;
+    padding: 6px 12px; border-radius: 20px;
+    font-size: 0.85rem; font-weight: 500;
 }
 
 /* Gamification Levels */
@@ -400,19 +338,22 @@ Dependencies: uses variables from variables.css
 .skill-card-visual.level-3 { border-color: #ffd700; background: linear-gradient(to bottom right, #fff, #fffdf0); box-shadow: 0 0 15px rgba(255, 215, 0, 0.4); transform: scale(1.05); }
 .skill-card-visual.level-3 > i { color: #d4af37; }
 
-.star-rating { margin-top: 5px; font-size: 0.6rem; display: flex; gap: 2px; color: #ffc107; }
+.star-rating { margin-top: 4px; font-size: 0.5rem; display: flex; gap: 1px; color: #ffc107; }
 
-/* --- 8. Certificates --- */
+/* --- 8. Certificates (Grid & Bigger Images) --- */
 
 .cert-list {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* Two columns strictly */
     gap: 15px;
+    /* Removed max-height/overflow to show all certs for parents */
 }
 
 .cert-item {
     display: flex;
+    flex-direction: column; /* Stacked: Image on top, text below */
     align-items: center;
+    text-align: center;
     padding: 15px;
     border: 1px solid var(--border-color);
     border-radius: var(--border-radius-medium);
@@ -423,45 +364,68 @@ Dependencies: uses variables from variables.css
 .cert-item:hover {
     border-color: var(--primary-color);
     background: #fff;
-    box-shadow: var(--box-shadow-light);
+    box-shadow: var(--box-shadow-medium);
+    transform: translateY(-2px);
 }
 
 .cert-icon {
-    width: 48px; height: 48px; margin-right: 15px;
-    position: relative; flex-shrink: 0;
+    width: 80px;
+    height: 80px;
+    margin-bottom: 10px;
+    margin-right: 0;
+    position: relative;
+    flex-shrink: 0;
 }
 
 .cert-icon .badge-container {
-    width: 128px !important; height: 128px !important;
-    transform: scale(0.375); transform-origin: top left;
+    width: 128px !important;
+    height: 128px !important;
+    /* Scales down from 128px to fit 80px box */
+    transform: scale(0.625);
+    transform-origin: top left;
     margin: 0; display: block; border: none; background: transparent;
 }
 
 .cert-icon .badge { filter: none !important; opacity: 1 !important; }
 
-.cert-info h4 { margin: 0 0 5px 0; color: var(--text-color); font-size: 1.1rem; }
-.cert-date { font-size: 0.85rem; color: #777; }
+.cert-info { width: 100%; }
 
-.cert-link {
-    margin-left: auto; padding: 6px 12px;
-    background: rgba(14, 178, 187, 0.1); color: var(--primary-color);
-    border-radius: var(--border-radius-small);
-    font-weight: 600; font-size: 0.9rem; text-decoration: none;
+.cert-info h4 {
+    margin: 5px 0;
+    color: var(--text-color);
+    font-size: 0.9rem;
+    font-weight: 700;
+    line-height: 1.3;
 }
-.cert-link:hover { background: var(--primary-color); color: white; }
 
-/* --- 9. Project Portfolio (Grid & Cards) --- */
+.cert-date {
+    display: block;
+    font-size: 0.75rem;
+    color: #888;
+    margin-bottom: 8px;
+}
+
+.cert-link-simple {
+    display: inline-block;
+    color: var(--primary-color);
+    font-size: 0.8rem;
+    text-decoration: none;
+    font-weight: 600;
+}
+.cert-link-simple:hover { text-decoration: underline; }
+
+/* --- 9. Project Portfolio (2 Columns) --- */
 
 .project-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    grid-template-columns: 1fr 1fr; /* Strict 2 columns */
     gap: 20px;
 }
 
 .project-card {
     border: 1px solid var(--border-color);
     border-radius: var(--border-radius-medium);
-    padding: 20px;
+    padding: 15px;
     background: #fff;
     display: flex;
     flex-direction: column;
@@ -471,23 +435,36 @@ Dependencies: uses variables from variables.css
 }
 
 .project-card:hover {
-    transform: translateY(-5px);
+    transform: translateY(-3px);
     box-shadow: var(--box-shadow-medium);
     border-color: var(--secondary-color);
 }
 
 .project-card::before {
     content: ''; position: absolute; top: 0; left: 0;
-    width: 4px; height: 100%; background: var(--secondary-color);
+    width: 100%; height: 4px; /* Top highlight instead of side */
+    background: var(--secondary-color);
 }
 
 .project-thumb {
-    height: 140px; background: #2d3748;
+    height: 140px;
+    background: #2d3748;
     overflow: hidden; position: relative;
-    margin-bottom: 15px; cursor: pointer; transition: transform 0.2s;
+    margin-bottom: 12px; cursor: pointer; transition: transform 0.2s;
+    border-radius: 4px;
 }
 .project-thumb:active { transform: scale(0.98); }
-.project-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.project-thumb img { width: 100%; height: 100%; object-fit: cover; opacity: 0.9; transition: opacity 0.2s; }
+.project-thumb:hover img { opacity: 1; }
+
+.play-overlay {
+    position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    color: white; font-size: 2rem;
+    opacity: 0.8; text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    pointer-events: none;
+}
+.project-thumb:hover .play-overlay { transform: translate(-50%, -50%) scale(1.1); opacity: 1; }
 
 .code-pattern-bg {
     width: 100%; height: 100%;
@@ -500,20 +477,20 @@ Dependencies: uses variables from variables.css
     flex-grow: 1; display: flex; flex-direction: column;
 }
 
-.project-content h3 { margin: 0 0 10px 0; color: var(--primary-color-dark); font-size: 1.1rem; }
+.project-content h3 { margin: 0 0 8px 0; color: var(--primary-color-dark); font-size: 1.05rem; }
 .project-excerpt {
-    font-size: 0.9rem; color: #666; margin: 0 0 15px 0;
-    flex-grow: 1; line-height: 1.5;
+    font-size: 0.85rem; color: #666; margin: 0 0 15px 0;
+    flex-grow: 1; line-height: 1.4;
 }
 
-.project-actions { display: flex; gap: 10px; margin-top: auto; }
+.project-actions { display: flex; gap: 8px; margin-top: auto; }
 
-/* CARD Buttons (Small) */
 .btn-launch, .btn-details {
-    padding: 8px 12px; border-radius: 4px;
-    font-size: 0.85rem; cursor: pointer;
+    padding: 6px 10px; border-radius: 4px;
+    font-size: 0.8rem; cursor: pointer;
     text-decoration: none; border: none;
     flex: 1; text-align: center; transition: 0.2s;
+    display: inline-flex; align-items: center; justify-content: center; gap: 5px;
 }
 
 .btn-launch { background: #e6fffa; color: #00bfa5; border: 1px solid #b2f5ea; }
@@ -534,37 +511,35 @@ Dependencies: uses variables from variables.css
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
 .project-modal-content {
-    background: white; width: 90%; max-width: 1100px;
-    max-height: 90vh; border-radius: 12px;
+    background: white; width: 90%; max-width: 1000px;
+    max-height: 85vh; border-radius: 12px;
     overflow-y: auto; position: relative;
-    padding: 30px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    padding: 25px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
 }
 
 .modal-close {
-    position: absolute; top: 20px; right: 25px; z-index: 10;
-    font-size: 2rem; line-height: 1;
+    position: absolute; top: 15px; right: 20px; z-index: 10;
+    font-size: 1.8rem; line-height: 1;
     background: none; border: none; cursor: pointer; color: #aaa;
 }
 .modal-close:hover { color: #333; }
 
-/* Modal Header (Title Only) */
 .modal-header {
     display: block; text-align: left;
     padding-bottom: 10px; border-bottom: none;
     margin-bottom: 0; padding-right: 40px;
 }
-.modal-header h2 { margin: 0; color: var(--primary-color-dark); }
+.modal-header h2 { margin: 0; color: var(--primary-color-dark); font-size: 1.5rem; }
 
-/* Modal Action Bar (The Big Buttons) */
 .modal-action-bar {
-    display: flex; gap: 15px; flex-wrap: wrap;
+    display: flex; gap: 12px; flex-wrap: wrap;
     padding-bottom: 20px; border-bottom: 1px solid #eee; margin-bottom: 20px;
 }
 
 .btn-action {
     display: inline-flex; align-items: center; justify-content: center;
-    padding: 12px 24px; border-radius: 8px;
-    font-weight: 600; font-size: 1rem;
+    padding: 10px 20px; border-radius: 6px;
+    font-weight: 600; font-size: 0.95rem;
     text-decoration: none; cursor: pointer;
     transition: all 0.2s ease; border: none;
     box-shadow: 0 4px 6px rgba(0,0,0,0.1);
@@ -573,32 +548,30 @@ Dependencies: uses variables from variables.css
     transform: translateY(-2px); box-shadow: 0 6px 12px rgba(0,0,0,0.15);
 }
 
-/* Action Button Variants */
 .btn-action.btn-play { background: linear-gradient(135deg, #2ecc71, #27ae60); color: white; }
 .btn-action.btn-watch { background: linear-gradient(135deg, #3498db, #2980b9); color: white; }
 
-/* Modal Body Layout */
 .modal-body-grid {
-    display: grid; grid-template-columns: 1fr 1fr; gap: 30px;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 25px;
     align-items: start;
 }
 
 .modal-left, .modal-right { min-width: 0; }
 
-.info-block { margin-bottom: 25px; }
+.info-block { margin-bottom: 20px; }
 .info-block h4, .modal-right h4 {
-    color: #4a5568; font-size: 0.9rem; text-transform: uppercase;
+    color: #4a5568; font-size: 0.85rem; text-transform: uppercase;
     letter-spacing: 0.05em; border-bottom: 2px solid var(--highlight-color);
-    display: inline-block; padding-bottom: 3px; margin-bottom: 10px;
+    display: inline-block; padding-bottom: 3px; margin-bottom: 8px;
 }
 
 .teacher-feedback blockquote {
     background: #fffbeb; border-left: 4px solid var(--highlight-color);
-    margin: 0; padding: 15px; font-style: italic; color: #4a5568;
+    margin: 0; padding: 12px; font-style: italic; color: #4a5568; font-size: 0.95rem;
 }
 
 .github-box {
-    text-align: center; padding: 40px;
+    text-align: center; padding: 30px;
     background: #f7fafc; border-radius: 8px; border: 1px dashed #cbd5e0;
 }
 .btn-github {
@@ -613,19 +586,14 @@ Dependencies: uses variables from variables.css
     background: #1e1e1e; color: #d4d4d4;
     border-radius: 8px; border: 1px solid #333;
     padding: 15px;
-    max-height: 500px; overflow: auto;
+    max-height: 400px; overflow: auto;
     width: 100%; box-sizing: border-box;
 }
 
 .code-scroll-container pre {
     margin: 0; font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
-    font-size: 0.9rem; white-space: pre;
+    font-size: 0.85rem; white-space: pre;
 }
-
-.code-scroll-container::-webkit-scrollbar { width: 10px; height: 10px; }
-.code-scroll-container::-webkit-scrollbar-track { background: #1e1e1e; }
-.code-scroll-container::-webkit-scrollbar-thumb { background: #555; border-radius: 5px; }
-.code-scroll-container::-webkit-scrollbar-thumb:hover { background: #777; }
 
 /* --- 12. Video Lightbox --- */
 
@@ -633,7 +601,7 @@ Dependencies: uses variables from variables.css
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
     background: rgba(0, 0, 0, 0.95);
     display: none; justify-content: center; align-items: center;
-    z-index: 100000; /* Highest priority */
+    z-index: 100000;
 }
 
 .video-modal-content {
@@ -652,8 +620,8 @@ Dependencies: uses variables from variables.css
 }
 
 .video-close-btn {
-    position: absolute; top: -40px; right: 0;
-    color: white; font-size: 30px;
+    position: absolute; top: -35px; right: 0;
+    color: white; font-size: 24px;
     background: none; border: none; cursor: pointer;
     z-index: 100001;
 }
@@ -662,17 +630,22 @@ Dependencies: uses variables from variables.css
 
 @media (max-width: 900px) {
     .dashboard-grid { grid-template-columns: 1fr; }
+    /* When single column, we can allow certificates to be slightly larger or keep 2 cols if space permits.
+       Here we allow grid items to be flexible. */
 }
 
 @media (max-width: 768px) {
     .header-content {
         flex-direction: column; align-items: center;
-        text-align: center; margin-top: -50px;
+        text-align: center; margin-top: -40px;
     }
-    .student-identity { margin-bottom: 20px; }
+    .student-identity { margin-bottom: 15px; }
     .duck-stats { width: 100%; justify-content: center; box-sizing: border-box; }
-    .grid-card { padding: 15px; }
     .modal-body-grid { grid-template-columns: 1fr; }
     .modal-action-bar { flex-direction: column; }
     .btn-action { width: 100%; }
+
+    /* On mobile, stack certificates and projects to 1 column */
+    .cert-list { grid-template-columns: 1fr; }
+    .project-grid { grid-template-columns: 1fr; }
 }
