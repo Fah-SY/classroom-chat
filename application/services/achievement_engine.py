@@ -32,7 +32,7 @@ def check_achievement(user, achievement):
                              .filter(ChallengeLog.helper == user.username).scalar(),
 
         # Longest session length in minutes
-        "session": longest_session_minutes,
+        "session": lambda: longest_session_minutes(user.id),
 
         # Count number of trades (regardless of status)
         "trade": lambda: db.session.query(func.count(DuckTradeLog.id))
@@ -107,8 +107,12 @@ def evaluate_user(user):
 
     return new_awards
 
-def longest_session_minutes():
-    logs = SessionLog.query.all()  # small table, otherwise add filters
+
+def longest_session_minutes(user_id):
+    """Calculate max session duration for a specific user."""
+    # Fixed: Filter by user_id instead of querying .all()
+    logs = SessionLog.query.filter_by(user_id=user_id).all()
+
     max_duration = 0
     now = datetime.utcnow()
     for log in logs:
