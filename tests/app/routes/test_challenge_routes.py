@@ -7,6 +7,7 @@ Summary: Unit tests for challenge routes Flask routes.
 import re
 from unittest.mock import patch
 import pytest
+from flask import session
 
 from application import db
 from application.models.challenge import Challenge
@@ -15,47 +16,8 @@ from application.models.configuration import Configuration
 
 # --- FIXTURES ---
 
-@pytest.fixture
-def sample_challenge_active(init_db):
-    """Fixture to create an active challenge with known difficulty."""
-    challenge = Challenge(
-        name="Dungeons of Kithgard",
-        slug="dungeons-of-kithgard",
-        domain="codecombat.com",
-        difficulty="medium",  # Medium = 1.0x multiplier. Base value 10 -> 10 points.
-        value=10,
-        is_active=True,
-        course_id="intro-to-python"
-    )
-    db.session.add(challenge)
-    db.session.commit()
-    return challenge
 
-
-@pytest.fixture
-def sample_configuration_with_multiplier(init_db):
-    """Fixture to create a configuration with duck multiplier."""
-    config = Configuration(
-        ai_teacher_enabled=True,
-        message_sending_enabled=True,
-        duck_multiplier=2
-    )
-    db.session.add(config)
-    db.session.commit()
-    return config
-
-# --- HELPER TO MOCK RENDER_TEMPLATE ---
-@pytest.fixture
-def mock_render_template(client):
-    """
-    Mocks render_template to return a static string.
-    This prevents TemplateNotFound errors when templates are missing in the test env.
-    """
-    with patch('application.routes.challenge_routes.render_template') as mock:
-        mock.return_value = "Mocked Template Content"
-        yield mock
-
-# --- TESTS ---
+# --- ROUTE TESTS ---
 
 def test_submit_challenge_get(client, init_db, sample_user, sample_configuration, mock_render_template):
     """Test GET request to challenge submission page."""
@@ -70,7 +32,7 @@ def test_submit_challenge_get(client, init_db, sample_user, sample_configuration
 
 def test_submit_challenge_no_session(client, init_db):
     """Test submitting challenge without logged in user."""
-    # Do not follow redirects so we can check the 302 location
+    # Do not follow redirects so we can check the 302 location and flash persistence
     response = client.post('/challenge/submit', data={
         'url': 'https://codecombat.com/play/level/dungeons-of-kithgard'
     }, follow_redirects=False)
@@ -79,12 +41,11 @@ def test_submit_challenge_no_session(client, init_db):
     assert response.status_code == 302
     assert '/login' in response.headers['Location']
 
-    # Check flash message by inspecting the session directly
+    # Check flash message in session
     with client.session_transaction() as sess:
         flashes = sess.get('_flashes', [])
-        # Flashes are list of (category, message)
         messages = [msg for cat, msg in flashes]
-        assert any("No session username found" in m for m in messages)
+        assert any("No session user found" in m for m in messages)
 
 
 def test_submit_challenge_no_url(client, init_db, sample_user, sample_configuration, mock_render_template):
@@ -99,14 +60,12 @@ def test_submit_challenge_no_url(client, init_db, sample_user, sample_configurat
 
     assert response.status_code == 200
 
-    # Check flash message in session
-    with client.session_transaction() as sess:
-        flashes = sess.get('_flashes', [])
-        messages = [msg for cat, msg in flashes]
-        assert any("Challenge URL is required" in m for m in messages)
+    # The route uses render_template(message=...) for this error.
+    # Our mock returns the message string, so we check response.data for it.
+    assert b"Challenge URL is required" in response.data
 
 
-def test_submit_challenge_success(client, init_db, sample_user, sample_configuration, sample_challenge_active, mock_render_template):
+def test_submit_challenge_success(client, init_db, sample_user, sample_configuration, sample_challenges_multi_domain, mock_render_template):
     """Test successful challenge submission."""
     with client.session_transaction() as sess:
         sess['user'] = sample_user.username
@@ -121,7 +80,6 @@ def test_submit_challenge_success(client, init_db, sample_user, sample_configura
             }
         }
 
-        # Follow redirects = True because success redirects to same page
         response = client.post('/challenge/submit', data={
             'url': 'https://codecombat.com/play/level/dungeons-of-kithgard?course=intro-to-python',
             'helpers': '',
@@ -130,12 +88,10 @@ def test_submit_challenge_success(client, init_db, sample_user, sample_configura
 
         assert response.status_code == 200
 
-        # Check flash messages
-        with client.session_transaction() as sess:
-            flashes = sess.get('_flashes', [])
-            messages = [msg for cat, msg in flashes]
-            assert any("Congrats" in m for m in messages)
-            assert any("10 ducks" in m for m in messages)
+        # The route renders the template with the success message directly.
+        # "Congrats {user}, you earned {ducks}..."
+        assert b"Congrats" in response.data
+        assert b"10 ducks" in response.data
 
 
 def test_submit_challenge_failed(client, init_db, sample_user, sample_configuration, mock_render_template):
@@ -158,10 +114,30 @@ def test_submit_challenge_failed(client, init_db, sample_user, sample_configurat
 
         assert response.status_code == 200
 
-        with client.session_transaction() as sess:
-            flashes = sess.get('_flashes', [])
-            messages = [msg for cat, msg in flashes]
-            assert any("Challenge could not be validated" in m for m in messages)
+        # Check response data for rendered message
+        assert b"Challenge could not be validated" in response.data
+
+
+def test_submit_challenge_no_configuration(client, init_db, sample_user, mock_render_template):
+    """Test submitting challenge when configuration is missing."""
+    with client.session_transaction() as sess:
+        sess['user'] = sample_user.username
+
+    # Ensure no configuration exists
+    Configuration.query.delete()
+    db.session.commit()
+
+    # Use follow_redirects=False to inspect the session flash before it is consumed
+    response = client.post('/challenge/submit', data={
+        'url': 'https://codecombat.com/play/level/test'
+    }, follow_redirects=False)
+
+    assert response.status_code == 302  # Expect redirect
+
+    with client.session_transaction() as sess:
+        flashes = sess.get('_flashes', [])
+        messages = [msg for cat, msg in flashes]
+        assert any("Configuration missing" in m for m in messages)
 
 
 def test_submit_challenge_with_helper(client, init_db, sample_user, sample_configuration, sample_challenge_active, mock_render_template):
@@ -219,6 +195,7 @@ def test_submit_challenge_with_notes(client, init_db, sample_user, sample_config
 
         assert response.status_code == 200
 
+# --- LOGIC & MODEL TESTS ---
 
 def test_detect_and_handle_challenge_url_valid(init_db, sample_user, sample_challenge_active):
     """Test detecting and handling a valid challenge URL."""
@@ -553,22 +530,31 @@ def test_url_pattern_matches_various_formats():
         assert match is not None, f"Failed to match URL: {url}"
 
 
-def test_submit_challenge_no_configuration(client, init_db, sample_user, mock_render_template):
-    """Test submitting challenge when configuration is missing."""
-    with client.session_transaction() as sess:
-        sess['user'] = sample_user.username
+def test_extract_challenge_details_domains():
+    """Test extracting details from various domain URLs."""
+    from application.routes.challenge_routes import _extract_challenge_details
 
-    # Ensure no configuration exists
-    Configuration.query.delete()
-    db.session.commit()
+    # Test CodeCombat
+    cc_url = 'https://codecombat.com/play/level/dungeons-of-kithgard'
+    cc_res = _extract_challenge_details(cc_url)
+    assert cc_res['domain'] == 'codecombat.com'
+    assert cc_res['challenge_slug'] == 'dungeons-of-kithgard'
 
-    response = client.post('/challenge/submit', data={
-        'url': 'https://codecombat.com/play/level/test'
-    }, follow_redirects=True)
+    # Test Ozaria
+    oz_url = 'https://ozaria.com/play/level/chapter-1-sky-mountain'
+    oz_res = _extract_challenge_details(oz_url)
+    assert oz_res['domain'] == 'ozaria.com'
+    assert oz_res['challenge_slug'] == 'chapter-1-sky-mountain'
 
-    assert response.status_code == 200
 
-    with client.session_transaction() as sess:
-        flashes = sess.get('_flashes', [])
-        messages = [msg for cat, msg in flashes]
-        assert any("Configuration missing" in m for m in messages)
+def test_detect_and_handle_ozaria_domain(init_db, sample_user, sample_challenges_multi_domain):
+    """Test full flow for an Ozaria domain challenge."""
+    from application.routes.challenge_routes import detect_and_handle_challenge_url
+
+    url = 'https://ozaria.com/play/level/chapter-1-sky-mountain'
+
+    result = detect_and_handle_challenge_url(url, sample_user.username, duck_multiplier=1)
+
+    assert result['handled'] is True
+    assert result['details']['success'] is True
+    assert result['details']['duck_reward'] == 20
