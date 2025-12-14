@@ -1,7 +1,7 @@
 """
 File: conftest.py
 Type: py
-Summary: Pytest configuration and fixtures for the test suite.
+Summary: Pytest configuration and fixtures (Restored + New Helpers).
 """
 
 import base64
@@ -10,6 +10,8 @@ import random
 import string
 import uuid
 from io import BytesIO
+from unittest.mock import patch
+
 from PIL import Image
 import pytest
 from flask_login import LoginManager
@@ -29,7 +31,10 @@ from application.models.project import Project
 from application.models.skill import Skill
 from application.models.user import User
 from application.config import TestingConfig
-from sqlalchemy import inspect
+
+# ============================================================================
+# ORIGINAL CORE FIXTURES (RESTORED)
+# ============================================================================
 
 @pytest.fixture(scope="module", autouse=True)
 def setup_directories():
@@ -45,14 +50,11 @@ def test_app():
         "WTF_CSRF_ENABLED": False
     })
 
-    # FIX: Ensure LoginManager is initialized for tests
-    # This prevents 'Flask object has no attribute login_manager' when templates access current_user
     if not hasattr(app, 'login_manager'):
         login_manager = LoginManager()
         login_manager.init_app(app)
         app.login_manager = login_manager
 
-        # Simple user loader for tests
         @login_manager.user_loader
         def load_user(user_id):
             return User.query.get(int(user_id))
@@ -69,28 +71,24 @@ def client(test_app):
 
 @pytest.fixture
 def logged_in_client(client, sample_user):
-    """A Flask test client that is logged in as sample_user."""
     with client.session_transaction() as sess:
-        sess['user'] = sample_user.username  # Session uses username string
-        sess['_user_id'] = str(sample_user.id) # Flask-Login uses ID
+        sess['user'] = sample_user.username
+        sess['_user_id'] = str(sample_user.id)
     return client
 
 @pytest.fixture
 def init_db(test_app):
-    """Provide a transactional database session for the test."""
     with test_app.app_context():
-        db.create_all()  # Create tables in the test database
-        yield db  # Yield the database instance to the test
-        db.session.rollback()  # Rollback after the test
-        db.drop_all()  # Clean up the database
+        db.create_all()
+        yield db
+        db.session.rollback()
+        db.drop_all()
 
 def generate_random_slug(length=10):
     return ''.join(random.choices(string.ascii_lowercase + string.digits, k=length))
 
 @pytest.fixture
 def add_sample_user(init_db):
-    """Adds a unique user to the database."""
-
     def _add_user(username, password, earned_ducks=0, profile_picture='Default_pfp.jpg'):
         existing_user = User.query.filter_by(username=username).first()
         if existing_user:
@@ -101,22 +99,18 @@ def add_sample_user(init_db):
             username=username,
             password_hash=password,
             earned_ducks=earned_ducks,
-            duck_balance=earned_ducks,  # keep balance in sync at creation
+            duck_balance=earned_ducks,
             profile_picture=profile_picture
         )
         db.session.add(user)
         db.session.commit()
         return user
-
     return _add_user
 
 @pytest.fixture
 def sample_user_with_ducks(test_app):
-    """Fixture that creates a user with ducks and cleans up afterward."""
     with test_app.app_context():
-        # Create tables if they don't exist
         db.create_all()
-
         try:
             user = User(
                 username='user_with_ducks',
@@ -128,21 +122,19 @@ def sample_user_with_ducks(test_app):
             db.session.commit()
             yield user
         except Exception as e:
-            db.session.rollback()  # Rollback if there's any error
-            raise e  # Reraise the exception to fail the test
+            db.session.rollback()
+            raise e
         finally:
-            # Cleanup: Delete user and commit changes
             try:
                 user_to_delete = db.session.query(User).filter_by(username='user_with_ducks').first()
                 if user_to_delete:
                     db.session.delete(user_to_delete)
                     db.session.commit()
             except Exception:
-                db.session.rollback()  # In case of an error during cleanup
+                db.session.rollback()
 
 @pytest.fixture
 def sample_challenge(init_db):
-    """Fixture to add a sample challenge with a unique slug."""
     slug = f"sample-challenge-{generate_random_slug()}"
     challenge = Challenge(
         name=f"Sample Challenge-{generate_random_slug()}",
@@ -158,7 +150,6 @@ def sample_challenge(init_db):
 
 @pytest.fixture
 def sample_user(init_db):
-    """Fixture to create a sample user with dynamic data."""
     username = f"user_{uuid.uuid4().hex[:8]}"
     user = User(username=username, password_hash="hashedpassword")
     db.session.add(user)
@@ -167,7 +158,6 @@ def sample_user(init_db):
 
 @pytest.fixture
 def sample_admin(init_db):
-    """Fixture to create a sample admin user with dynamic data."""
     username = TestingConfig.ADMIN_USERNAME
     password = TestingConfig.ADMIN_PASSWORD
     admin_user = User(
@@ -176,28 +166,24 @@ def sample_admin(init_db):
         earned_ducks=0,
         duck_balance=0
     )
-
     db.session.add(admin_user)
     db.session.commit()
     return admin_user
 
 @pytest.fixture
 def logged_in_admin(client, sample_user):
-    """A Flask test client that is logged in as sample_user."""
     with client.session_transaction() as sess:
-        sess['user'] = sample_user.username  # Use ID for correctness
+        sess['user'] = sample_user.username
     return client
 
 @pytest.fixture
 def sample_challenge_log(init_db):
-    """Fixture for adding a sample ChallengeLog entry with unique values."""
     unique_username = f"user_{uuid.uuid4()}"
     unique_slug = f"challenge-slug-{uuid.uuid4()}"
-
     challenge_log = ChallengeLog(
         username=unique_username,
         domain="codecombat.com",
-        challenge_slug=unique_slug,  # Updated from challenge_name
+        challenge_slug=unique_slug,
         course_id="12345",
         course_instance="spring2025"
     )
@@ -207,12 +193,8 @@ def sample_challenge_log(init_db):
 
 @pytest.fixture
 def sample_ai_settings(test_app):
-    # Ensure the database schema is created
     with test_app.app_context():
-        # Create the tables (if they haven't been created yet)
         db.create_all()
-
-        # Add sample data to the database
         settings = [
             AISettings(key='role', value='Custom AI role'),
             AISettings(key='username', value='AI Teacher'),
@@ -220,16 +202,12 @@ def sample_ai_settings(test_app):
         ]
         db.session.add_all(settings)
         db.session.commit()
-
-        yield settings  # This will be available in the test function
-
-        # Cleanup after the test
+        yield settings
         db.session.remove()
-        db.drop_all()  # Drop all tables after the test
+        db.drop_all()
 
 @pytest.fixture
 def sample_banned_words(init_db):
-    """Fixture to populate the database with sample BannedWords."""
     words = [
         BannedWords(word='forbidden', reason='Inappropriate language', active=True),
         BannedWords(word='bannedword', reason='General ban', active=False),
@@ -240,10 +218,11 @@ def sample_banned_words(init_db):
 
 @pytest.fixture
 def sample_configuration(init_db):
-    """Fixture to create a sample Configuration entry."""
     config = Configuration(
         ai_teacher_enabled=True,
-        message_sending_enabled=True
+        message_sending_enabled=True,
+        # Added multiplier here to support new tests without breaking old ones
+        duck_multiplier=1
     )
     db.session.add(config)
     db.session.commit()
@@ -251,7 +230,6 @@ def sample_configuration(init_db):
 
 @pytest.fixture
 def sample_users(init_db):
-    """Fixture to create sample users."""
     user1 = User(username=f"User_{uuid.uuid4().hex[:8]}", password_hash="test")
     user2 = User(username=f"User_{uuid.uuid4().hex[:8]}", password_hash="test")
     db.session.add_all([user1, user2])
@@ -260,7 +238,6 @@ def sample_users(init_db):
 
 @pytest.fixture
 def sample_conversation(init_db, sample_users):
-    """Fixture to create a sample Conversation with users."""
     conversation = Conversation(title=f"Sample Conversation {uuid.uuid4().hex[:8]}")
     conversation.users.extend(sample_users)
     db.session.add(conversation)
@@ -269,7 +246,6 @@ def sample_conversation(init_db, sample_users):
 
 @pytest.fixture
 def sample_course(init_db):
-    """Fixture to create a sample Course."""
     course = Course(
         id=f"course_{uuid.uuid4().hex[:8]}",
         name="Intro to Programming",
@@ -283,7 +259,6 @@ def sample_course(init_db):
 
 @pytest.fixture
 def sample_message(init_db, sample_user, sample_conversation):
-    """Fixture to create a sample message."""
     message = Message(
         conversation_id=sample_conversation.id,
         user_id=sample_user.id,
@@ -296,7 +271,6 @@ def sample_message(init_db, sample_user, sample_conversation):
 
 @pytest.fixture
 def sample_project(init_db, sample_user):
-    """Fixture to create a sample project."""
     project = Project(
         name=f"Project_{uuid.uuid4().hex[:8]}",
         description="This is a sample project description.",
@@ -309,18 +283,13 @@ def sample_project(init_db, sample_user):
 
 @pytest.fixture
 def sample_skill(init_db, sample_user):
-    """Fixture to create a sample skill."""
-    skill = Skill(
-        name="Python",
-        user_id=sample_user.id
-    )
+    skill = Skill(name="Python", user_id=sample_user.id)
     db.session.add(skill)
     db.session.commit()
     return skill
 
 @pytest.fixture
 def sample_image_data():
-    """Fixture to provide a sample image data URL."""
     image = Image.new('RGB', (100, 100), color=(73, 109, 137))
     img_io = BytesIO()
     image.save(img_io, 'PNG')
@@ -330,18 +299,14 @@ def sample_image_data():
 
 @pytest.fixture
 def auth_headers(sample_admin):
-    """Create basic auth headers for admin authentication."""
     import base64
     from application.config import TestingConfig
-
     credentials = f"{TestingConfig.ADMIN_USERNAME}:{TestingConfig.ADMIN_PASSWORD}"
     encoded = base64.b64encode(credentials.encode()).decode('utf-8')
     return {'Authorization': f'Basic {encoded}'}
 
 @pytest.fixture
 def sample_duck_trade(init_db, sample_user):
-    """Create a sample duck trade for testing (bound to correct session)."""
-    # NOTE: Assuming duck_trade model exists
     try:
         from application.models.duck_trade import DuckTradeLog
         sample_user.duck_balance = 100
@@ -354,8 +319,6 @@ def sample_duck_trade(init_db, sample_user):
         )
         db.session.add(trade)
         db.session.commit()
-
-        # Optional: re-fetch from session to ensure it's not detached
         trade = DuckTradeLog.query.get(trade.id)
         return trade
     except ImportError:
@@ -363,7 +326,6 @@ def sample_duck_trade(init_db, sample_user):
 
 @pytest.fixture
 def sample_achievement(init_db):
-    """Fixture to create a sample achievement."""
     achievement = Achievement(
         name="Python Master",
         slug="python-basics",
@@ -379,7 +341,6 @@ def sample_achievement(init_db):
 
 @pytest.fixture
 def sample_user_achievement(init_db, sample_user, sample_achievement):
-    """Fixture to create a user achievement."""
     user_achievement = UserAchievement(
         user_id=sample_user.id,
         achievement_id=sample_achievement.id
@@ -390,7 +351,6 @@ def sample_user_achievement(init_db, sample_user, sample_achievement):
 
 @pytest.fixture
 def sample_ducks_achievement(init_db):
-    """Fixture to create a ducks-based achievement."""
     achievement = Achievement(
         name="Duck Collector",
         slug="duck-collector-50",
@@ -405,7 +365,6 @@ def sample_ducks_achievement(init_db):
 
 @pytest.fixture
 def sample_chat_achievement(init_db):
-    """Fixture to create a chat-based achievement."""
     achievement = Achievement(
         name="First Message",
         slug="first-message",
@@ -420,32 +379,10 @@ def sample_chat_achievement(init_db):
 
 @pytest.fixture
 def sample_new_achievements(init_db):
-    """Fixture to create sample achievements that would be newly awarded."""
     achievements = [
-        Achievement(
-            name="First Message",
-            slug="first-message",
-            type="chat",
-            reward=10,
-            description="Send your first message",
-            requirement_value="1"
-        ),
-        Achievement(
-            name="Duck Collector",
-            slug="duck-collector-10",
-            type="ducks",
-            reward=25,
-            description="Collect 10 ducks",
-            requirement_value="10"
-        ),
-        Achievement(
-            name="Project Starter",
-            slug="project-starter",
-            type="project",
-            reward=50,
-            description="Create your first project",
-            requirement_value="1"
-        )
+        Achievement(name="First Message", slug="first-message", type="chat", reward=10, description="Send your first message", requirement_value="1"),
+        Achievement(name="Duck Collector", slug="duck-collector-10", type="ducks", reward=25, description="Collect 10 ducks", requirement_value="10"),
+        Achievement(name="Project Starter", slug="project-starter", type="project", reward=50, description="Create your first project", requirement_value="1")
     ]
     db.session.add_all(achievements)
     db.session.commit()
@@ -453,28 +390,76 @@ def sample_new_achievements(init_db):
 
 @pytest.fixture
 def sample_multiple_achievements(init_db):
-    """Fixture to create multiple varied achievements for testing."""
     achievements = [
-        Achievement(
-            id=1,
-            name="Achievement One",
-            slug="achievement-one",
-            type="ducks",
-            reward=10,
-            description="First achievement",
-            requirement_value="10"
-        ),
-        Achievement(
-            id=2,
-            name="Achievement Two",
-            slug="achievement-two",
-            type="chat",
-            reward=20,
-            description="Second achievement",
-            requirement_value="5"
-        )
+        Achievement(id=1, name="Achievement One", slug="achievement-one", type="ducks", reward=10, description="First achievement", requirement_value="10"),
+        Achievement(id=2, name="Achievement Two", slug="achievement-two", type="chat", reward=20, description="Second achievement", requirement_value="5")
     ]
     for ach in achievements:
         db.session.add(ach)
     db.session.commit()
     return achievements
+
+# ============================================================================
+# NEW FIXTURES (REQUIRED FOR CHALLENGE TESTS)
+# ============================================================================
+
+@pytest.fixture
+def sample_challenge_active(init_db):
+    """Fixture to create an active challenge with known difficulty."""
+    challenge = Challenge(
+        name="Dungeons of Kithgard",
+        slug="dungeons-of-kithgard",
+        domain="codecombat.com",
+        difficulty="medium",
+        value=10,
+        is_active=True,
+        course_id="intro-to-python"
+    )
+    db.session.add(challenge)
+    db.session.commit()
+    return challenge
+
+@pytest.fixture
+def sample_challenges_multi_domain(init_db):
+    """Fixture to create active challenges across multiple domains."""
+    c1 = Challenge(
+        name="Dungeons of Kithgard",
+        slug="dungeons-of-kithgard",
+        domain="codecombat.com",
+        difficulty="medium",
+        value=10,
+        is_active=True,
+        course_id="intro-to-python"
+    )
+    c2 = Challenge(
+        name="Chapter 1: Sky Mountain",
+        slug="chapter-1-sky-mountain",
+        domain="ozaria.com",
+        difficulty="hard",
+        value=20,
+        is_active=True,
+        course_id="intro-to-coding"
+    )
+    db.session.add_all([c1, c2])
+    db.session.commit()
+    return [c1, c2]
+
+@pytest.fixture
+def mock_render_template(client):
+    """
+    Robust mock for render_template that captures message arguments.
+    """
+    def side_effect(template_name_or_list, **context):
+        # 1. Check if 'message' was passed explicitly as a keyword argument
+        if 'message' in context:
+            return context['message']
+
+        # 2. Check if it's inside a 'context' dict
+        if 'context' in context and isinstance(context['context'], dict):
+             return context['context'].get('message', "Mocked Template Content")
+
+        # 3. Fallback
+        return "Mocked Template Content"
+
+    with patch('application.routes.challenge_routes.render_template', side_effect=side_effect) as mock:
+        yield mock
