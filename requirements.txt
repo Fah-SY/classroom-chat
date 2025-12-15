@@ -19,3 +19,4 @@ Flask-SocketIO~=5.3.6
 flask_apscheduler
 flask-admin
 boto3
+flask_wtf
