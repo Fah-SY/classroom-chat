@@ -7,12 +7,13 @@ Summary: Flask routes for admin advanced routes functionality.
 from flask import request, redirect
 from flask_admin import Admin, AdminIndexView, expose
 from flask_admin.contrib.sqla import ModelView
-from flask_admin.theme import Bootstrap4Theme
+
 from application import db
 
 
 class SecureModelView(ModelView):
     """Restrict access to localhost only"""
+
     can_create = True
     can_edit = True
     can_delete = True
@@ -20,7 +21,6 @@ class SecureModelView(ModelView):
     column_display_pk = True
 
     def is_accessible(self):
-        # Note: In production, consider using current_user.is_admin instead of IP checks
         return request.remote_addr == '127.0.0.1'
 
     def inaccessible_callback(self, name, **kwargs):
@@ -28,27 +28,33 @@ class SecureModelView(ModelView):
 
 
 class AdvancedIndex(AdminIndexView):
-    """Custom landing page for advanced admin - renders in admin_base.html"""
+    """Custom landing page for advanced admin"""
+
     @expose('/')
     def index(self):
-        model_views = [v for v in self.admin._views if isinstance(v, ModelView)]
-        return self.render('admin/advanced_panel.html', views=model_views)
+        model_views = [
+            v for v in self.admin._views
+            if isinstance(v, ModelView)
+        ]
+        return self.render(
+            'admin/advanced_panel.html',
+            views=model_views
+        )
 
 
 def init_admin(app):
     """Initialize the advanced admin interface"""
-    # 1. Initialize Admin with the Theme
+
     admin = Admin(
         app,
         name="Advanced Admin",
-        index_view=AdvancedIndex(url='/admin/advanced', endpoint='admin_advanced'),
-        theme=Bootstrap4Theme(),
+        index_view=AdvancedIndex(
+            url='/admin/advanced',
+            endpoint='admin_advanced'
+        ),
+        base_template='admin/admin_base.html'
     )
 
-    # 2. Override the base template manually
-    admin.base_template = 'admin/admin_base.html'
-
-    # 3. Register Views
     for mapper in db.Model.registry.mappers:
         model = mapper.class_
         admin.add_view(
