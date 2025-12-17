@@ -673,22 +673,56 @@ def edit_project_details(project_id):
     return render_template('user/edit_project.html', project=project)
 
 
-@admin.route('/pending-reviews')
+# Renamed from 'pending_reviews' to 'manage_projects' to reflect the new capabilities
+@admin.route('/manage-projects')
 @local_only
-def pending_reviews():
-    # Fetch projects where teacher_comment is NULL or empty string
-    projects = Project.query.filter(
+def manage_projects():
+    # 1. Get filter type from URL (default to 'pending')
+    filter_type = request.args.get('filter', 'pending')
+
+    # 2. Always calculate pending count for the UI tab label
+    pending_count = Project.query.filter(
         (Project.teacher_comment == None) | (Project.teacher_comment == '')
-    ).all()
+    ).count()
 
-    return render_template('admin/pending_projects.html', projects=projects)
+    # 3. Build the query based on filter
+    query = Project.query
+    if filter_type == 'pending':
+        query = query.filter(
+            (Project.teacher_comment == None) | (Project.teacher_comment == '')
+        )
+
+    # 4. Fetch results (Newest first)
+    projects = query.order_by(Project.id.desc()).all()
+
+    # Ensure you are rendering the NEW template name
+    return render_template('admin/manage_projects.html',
+                           projects=projects,
+                           filter_type=filter_type,
+                           pending_count=pending_count)
 
 
-@admin.route('/save-comment/<int:project_id>', methods=['POST'])
+# Renamed to handle both Approval and Rejection logic
+@admin.route('/handle-project-review/<int:project_id>', methods=['POST'])
 @local_only
-def save_teacher_comment(project_id):
+def handle_project_review(project_id):
     project = Project.query.get_or_404(project_id)
-    project.teacher_comment = request.form.get('teacher_comment')
+
+    action = request.form.get('action')  # 'approve' or 'reject'
+    comment = request.form.get('teacher_comment')  # The text content
+    filter_context = request.form.get('filter_context', 'pending')  # To redirect back to same tab
+
+    if action == 'reject':
+        # Clearing the comment effectively marks it as "Pending" again
+        project.teacher_comment = None
+        flash(f'Project "{project.name}" marked for revision.', 'warning')
+
+    elif action == 'approve':
+        # Update the comment
+        project.teacher_comment = comment
+        flash(f'Feedback published for "{project.name}".', 'success')
+
     db.session.commit()
-    flash(f'Comment saved for {project.name}', 'success')
-    return redirect(url_for('admin.pending_reviews'))
+
+    # Redirect back to the list, preserving the user's current filter tab
+    return redirect(url_for('admin.manage_projects', filter=filter_context))
