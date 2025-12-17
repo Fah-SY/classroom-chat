@@ -1,36 +1,12 @@
-import sqlite3
 import os
+import sqlite3
 
 # --- IMPORTS ---
-try:
-    from seed_ben import seed_ben_data
-except ImportError:
-    seed_ben_data = None
-
-try:
-    from seed_courses import seed_course_instances
-except ImportError:
-    seed_course_instances = None
-
-try:
-    from seed_logs import seed_challenge_logs
-except ImportError:
-    seed_challenge_logs = None
-
 try:
     from cleanup_logs import cleanup_invalid_logs
 except ImportError:
     cleanup_invalid_logs = None
 
-# --- NEW IMPORT ---
-try:
-    from migrate_challenge_names import migrate_challenge_names
-except ImportError:
-    migrate_challenge_names = None
-
-try:
-    from migrate_domains import migrate_codecombat_domains
-except ImportError:
     migrate_codecombat_domains = None
 
 # ================= CONFIGURATION =================
@@ -39,10 +15,8 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(BASE_DIR, "..", DB_FILENAME)
 
 NEW_COLUMNS = {
-    "skills": [
-        ("category", "VARCHAR(50)", "concept"),
-        ("icon", "VARCHAR(50)", "fas fa-code"),
-        ("proficiency", "INTEGER", 1)
+    "projects": [
+        ("video_transcript", "TEXT", None),
     ]
 }
 
@@ -86,42 +60,12 @@ if __name__ == "__main__":
                 # 1. Apply Schema Changes
                 apply_schema_changes(conn)
 
-                # 2. Seed Course Instances (Dependencies first)
-                if seed_course_instances:
-                    seed_course_instances(conn)
-                else:
-                    print("Skipping Course Instances (Script not found)")
-
-                # 3. Seed 'Ben' Data
-                if seed_ben_data:
-                    seed_ben_data(conn)
-                else:
-                    print("Skipping Ben Data (Script not found)")
-
-                # 4. Seed Challenge Logs from CSV
-                if seed_challenge_logs:
-                    seed_challenge_logs(conn)
-                else:
-                    print("Skipping Challenge Logs (Script not found)")
-
                 # 5. Cleanup orphan challenge logs
                 if cleanup_invalid_logs:
                     cleanup_invalid_logs(conn)
                 else:
                     print("Skipping Cleanup (Script not found)")
 
-
-                # 6. Migrate Domains
-                if migrate_codecombat_domains:
-                    migrate_codecombat_domains(conn)
-                else:
-                    print("Skipping Domain Migration (Script not found)")
-
-                # 7. Migrate Challenge Names to Slugs (NEW)
-                if migrate_challenge_names:
-                    migrate_challenge_names(conn)
-                else:
-                    print("Skipping Challenge Name Migration (Script not found)")
 
 
 

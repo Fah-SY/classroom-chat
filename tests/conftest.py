@@ -9,6 +9,7 @@ import os
 import random
 import socket
 import string
+import tempfile
 import threading
 import uuid
 from io import BytesIO
@@ -35,6 +36,7 @@ from application.models.project import Project
 from application.models.skill import Skill
 from application.models.user import User
 
+db_fd, db_path = tempfile.mkstemp(suffix='.db')
 
 # ============================================================================
 # ORIGINAL CORE FIXTURES (RESTORED)
@@ -46,13 +48,22 @@ def setup_directories():
     os.makedirs('userData/pdfs', exist_ok=True)
     os.makedirs('userData/other', exist_ok=True)
 
+
+
+
+
 @pytest.fixture(scope='session')
 def test_app():
     app = create_app(TestingConfig)
+
+    # --- CRITICAL FIX ---
+    # Overwrite the in-memory DB with a file-based DB so threads can share it
     app.config.update({
         "TESTING": True,
-        "WTF_CSRF_ENABLED": False
+        "WTF_CSRF_ENABLED": False,
+        "SQLALCHEMY_DATABASE_URI": f"sqlite:///{db_path}"
     })
+    # --------------------
 
     if not hasattr(app, 'login_manager'):
         login_manager = LoginManager()
@@ -68,6 +79,17 @@ def test_app():
         yield app
         db.session.remove()
         db.drop_all()
+
+
+# Ensure we clean up the temp file after all tests are done
+@pytest.fixture(scope="session", autouse=True)
+def cleanup_temp_db(request):
+    def remove_db():
+        os.close(db_fd)
+        if os.path.exists(db_path):
+            os.remove(db_path)
+
+    request.addfinalizer(remove_db)
 
 
 # ============================================================================

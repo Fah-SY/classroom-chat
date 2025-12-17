@@ -18,6 +18,7 @@ class Project(db.Model):
     code_snippet = db.Column(db.Text, nullable=True)    # For younger students (direct code)
     github_link = db.Column(db.String(255), nullable=True) # For older students
     video_url = db.Column(db.String(255), nullable=True) # Link to recording (e.g., YouTube/Vimeo/Cloud)
+    video_transcript = db.Column(db.Text, nullable=True)
     image_url = db.Column(db.String(255), nullable=True) # Thumbnail for the card
 
     def __repr__(self):
