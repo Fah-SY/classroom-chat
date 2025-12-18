@@ -10,3 +10,4 @@ venv/
 userData/
 *.env
 certificates/
+/license/license.lic
