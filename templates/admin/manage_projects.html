@@ -275,88 +275,90 @@
         </div>
     {% else %}
 
-        {% for project in projects %}
-        <div class="project-card">
+{% for project in projects %}
+<div class="project-card">
 
-            <div class="card-sidebar">
-                <div class="sidebar-thumb">
-                    {% if project.image_url %}
-                        <img src="{{ url_for('static', filename=project.image_url) }}" class="thumb-img" alt="Project">
-                    {% else %}
-                        <div style="height:100%; display:flex; align-items:center; justify-content:center; color:#cbd5e0;">
-                            <i class="fas fa-image fa-2x"></i>
-                        </div>
-                    {% endif %}
-                </div>
-
-                <div class="sidebar-header">
-                    <div class="project-name" title="{{ project.name }}">{{ project.name if project.name else 'Untitled' }}</div>
-                    <div class="user-nick">{{ project.user.nickname }}</div>
-                    <small style="color: var(--text-secondary);">@{{ project.user.username }}</small>
-                </div>
-
-                <div class="sidebar-links">
-                    {% if project.link %}
-                    <a href="{{ project.link }}" target="_blank" class="btn-link">
-                        <i class="fas fa-play-circle" style="color: var(--text-accent);"></i> Play Game
-                    </a>
-                    {% endif %}
-                    {% if project.github_link %}
-                    <a href="{{ project.github_link }}" target="_blank" class="btn-link">
-                        <i class="fab fa-github"></i> GitHub
-                    </a>
-                    {% endif %}
-                    {% if project.video_url %}
-                    <a href="{{ project.video_url }}" target="_blank" class="btn-link">
-                        <i class="fab fa-youtube" style="color: #e53e3e;"></i> Video
-                    </a>
-                    {% endif %}
-                </div>
-            </div>
-
-            {% if project.code_snippet %}
-            <div class="card-code-area">
-                <div class="code-title">
-                    <span>CODE SNAPSHOT</span>
-                    <span><i class="fas fa-code"></i></span>
-                </div>
-                <div class="code-scroller">
-                    <pre>{{ project.code_snippet }}</pre>
-                </div>
-            </div>
+    <div class="card-sidebar">
+        <div class="sidebar-thumb">
+            {% if project.image_url %}
+                <img src="{{ url_for('static', filename=project.image_url) }}" class="thumb-img" alt="Project">
             {% else %}
-            <div class="no-code-state">
-                <i class="fas fa-code-branch" style="font-size: 3rem; margin-bottom: 15px; opacity: 0.3;"></i>
-                <span>No Code Provided</span>
-            </div>
+                <div style="height:100%; display:flex; align-items:center; justify-content:center; color:#cbd5e0;">
+                    <i class="fas fa-image fa-2x"></i>
+                </div>
             {% endif %}
-
-            <div class="card-feedback-area">
-                <form action="{{ url_for('admin.handle_project_review', project_id=project.id) }}" method="POST" class="feedback-form">
-                    <input type="hidden" name="filter_context" value="{{ filter_type }}">
-
-                    <label class="feedback-label" for="comment-{{ project.id }}">Teacher Feedback</label>
-                    <textarea
-                        id="comment-{{ project.id }}"
-                        name="teacher_comment"
-                        class="feedback-input"
-                        placeholder="Type feedback here..."
-                    >{{ project.teacher_comment if project.teacher_comment else '' }}</textarea>
-
-                    <div class="action-row">
-                        <button type="submit" name="action" value="reject" class="btn-reject" title="Return for Revision">
-                            <i class="fas fa-undo"></i> Return
-                        </button>
-                        <button type="submit" name="action" value="approve" class="btn-approve" title="Approve Project">
-                            <i class="fas fa-check"></i>
-                            {% if project.teacher_comment %}Update{% else %}Approve{% endif %}
-                        </button>
-                    </div>
-                </form>
-            </div>
-
         </div>
-        {% endfor %}
+
+        <div class="sidebar-header">
+            <div class="project-name" title="{{ project.name }}">{{ project.name if project.name else 'Untitled' }}</div>
+            <div class="user-nick">{{ project.user.nickname }}</div>
+            <small style="color: var(--text-secondary);">@{{ project.user.username }}</small>
+        </div>
+
+        <div class="sidebar-links">
+            <a href="{{ url_for('user.edit_project', project_id=project.id) }}" class="btn-link" style="border-color: var(--text-accent); color: var(--text-accent); font-weight: bold;">
+                <i class="fas fa-edit"></i> Edit Project Details
+            </a>
+
+            <hr style="margin: 5px 0; border: 0; border-top: 1px solid var(--border-color);">
+
+            {% if project.link %}
+            <a href="{{ project.link }}" target="_blank" class="btn-link">
+                <i class="fas fa-play-circle" style="color: var(--text-accent);"></i> Play Game
+            </a>
+            {% endif %}
+            {% if project.github_link %}
+            <a href="{{ project.github_link }}" target="_blank" class="btn-link">
+                <i class="fab fa-github"></i> GitHub
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if project.code_snippet %}
+    <div class="card-code-area">
+        <div class="code-title">
+            <span>CODE SNAPSHOT (READ ONLY)</span>
+            <span><i class="fas fa-code"></i></span>
+        </div>
+        <div class="code-scroller">
+            <pre>{{ project.code_snippet }}</pre>
+        </div>
+    </div>
+    {% else %}
+    <div class="no-code-state">
+        <i class="fas fa-code-branch" style="font-size: 3rem; margin-bottom: 15px; opacity: 0.3;"></i>
+        <span>No Code Provided</span>
+    </div>
+    {% endif %}
+
+    <div class="card-feedback-area">
+        <form action="{{ url_for('admin.handle_project_review', project_id=project.id) }}" method="POST" class="feedback-form">
+            <input type="hidden" name="filter_context" value="{{ filter_type }}">
+
+            <label class="feedback-label" for="comment-{{ project.id }}">Teacher Feedback</label>
+            <textarea
+                id="comment-{{ project.id }}"
+                name="teacher_comment"
+                class="feedback-input"
+                placeholder="Type feedback here..."
+            >{{ project.teacher_comment if project.teacher_comment else '' }}</textarea>
+
+            <div class="action-row">
+                <button type="submit" name="action" value="reject" class="btn-reject" title="Return for Revision">
+                    <i class="fas fa-undo"></i> Return
+                </button>
+                <button type="submit" name="action" value="approve" class="btn-approve">
+                    <i class="fas fa-check"></i>
+                    {% if project.teacher_comment %}Update{% else %}Approve{% endif %}
+                </button>
+            </div>
+        </form>
+    </div>
+
+</div>
+{% endfor %}
+
 
     {% endif %}
 
