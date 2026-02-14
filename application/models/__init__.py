@@ -22,5 +22,7 @@ def setup_models():
     from .duck_trade import DuckTradeLog  # noqa: F401
     from .achievements import Achievement  # noqa: F401
     from .note import Note # noqa: F401
+    from .classroom import Classroom  # <--- ADD THIS LINE
+    from .course_instance import CourseInstance
 
 setup_models()

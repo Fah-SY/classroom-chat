@@ -302,7 +302,7 @@ def create_user():
         return jsonify(success=False, message="Username already exists"), 409
 
     try:
-        new_user = User(username=username, ducks=ducks)
+        new_user = User(username=username, duck_balance=ducks)
         new_user.set_password(password)
         db.session.add(new_user)
         db.session.commit()
